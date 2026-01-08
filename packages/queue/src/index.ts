@@ -1,12 +1,12 @@
-export { redis, redisPub, redisSub, Redis } from './redis';
+export { redis, redisPub, redisSub, Redis } from './redis.js';
 export {
   computeQueue,
   enqueueComputeJobs,
   COMPUTE_QUEUE_NAME,
   ALL_OPERATIONS,
   Queue,
-} from './queue';
-export { publishProgress, subscribeToProgress } from './pubsub';
+} from './queue.js';
+export { publishProgress, subscribeToProgress } from './pubsub.js';
 export {
   OperationSchema,
   JobStatusSchema,
@@ -16,4 +16,4 @@ export {
   type JobStatus,
   type ComputeJobPayload,
   type ProgressEvent,
-} from './schemas';
+} from './schemas.js';

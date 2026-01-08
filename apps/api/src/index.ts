@@ -3,8 +3,8 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { applyWSSHandler } from '@trpc/server/adapters/ws';
 import { appRouter } from '@worker-app/api';
-import { createContext } from './context';
-import { auth } from './auth';
+import { createContext } from './context.js';
+import { auth } from './auth.js';
 import { redis } from '@worker-app/queue';
 
 const PORT = parseInt(process.env.PORT ?? '4000', 10);

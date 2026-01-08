@@ -1,6 +1,6 @@
 import { createTRPCClient, httpBatchLink, splitLink, wsLink, createWSClient } from '@trpc/client';
 import superjson from 'superjson';
-import type { AppRouter } from './routers';
+import type { AppRouter } from './routers/index.js';
 
 export function createClient(apiUrl: string, wsUrl: string) {
   const wsClient = createWSClient({

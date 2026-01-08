@@ -1,10 +1,10 @@
 // tRPC
-export { router, publicProcedure, protectedProcedure, createCallerFactory } from './trpc';
-export type { Context } from './trpc';
+export { router, publicProcedure, protectedProcedure, createCallerFactory } from './trpc.js';
+export type { Context } from './trpc.js';
 
 // Routers
-export { appRouter, type AppRouter } from './routers';
-export { computeRouter } from './routers/compute';
+export { appRouter, type AppRouter } from './routers/index.js';
+export { computeRouter } from './routers/compute.js';
 
 // Schemas
-export * from './schemas';
+export * from './schemas.js';

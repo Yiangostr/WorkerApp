@@ -1,5 +1,5 @@
-import { openai, DEFAULT_MODEL } from './client';
-import { parseComputeResponse } from './schemas';
+import { openai, DEFAULT_MODEL } from './client.js';
+import { parseComputeResponse } from './schemas.js';
 
 export type Operation = 'ADD' | 'SUBTRACT' | 'MULTIPLY' | 'DIVIDE';
 

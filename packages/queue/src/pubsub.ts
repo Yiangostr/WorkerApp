@@ -1,5 +1,5 @@
-import { redisPub, redisSub } from './redis';
-import { ProgressEventSchema, type ProgressEvent } from './schemas';
+import { redisPub, redisSub } from './redis.js';
+import { ProgressEventSchema, type ProgressEvent } from './schemas.js';
 
 const PROGRESS_CHANNEL_PREFIX = 'run:progress:';
 

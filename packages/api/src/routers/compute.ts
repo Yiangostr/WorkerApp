@@ -2,14 +2,14 @@ import { observable } from '@trpc/server/observable';
 import { prisma, Operation } from '@worker-app/db';
 import { enqueueComputeJobs, subscribeToProgress, ALL_OPERATIONS } from '@worker-app/queue';
 import type { ProgressEvent } from '@worker-app/queue';
-import { router, protectedProcedure, publicProcedure } from '../trpc';
+import { router, protectedProcedure, publicProcedure } from '../trpc.js';
 import {
   CreateRunInputSchema,
   GetRunInputSchema,
   SubscribeRunInputSchema,
   RunSchema,
   ProgressEventSchema,
-} from '../schemas';
+} from '../schemas.js';
 
 export const computeRouter = router({
   create: protectedProcedure.input(CreateRunInputSchema).mutation(async ({ ctx, input }) => {

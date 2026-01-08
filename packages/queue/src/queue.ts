@@ -1,6 +1,6 @@
 import { Queue } from 'bullmq';
-import { redis } from './redis';
-import type { ComputeJobPayload, Operation } from './schemas';
+import { redis } from './redis.js';
+import type { ComputeJobPayload, Operation } from './schemas.js';
 
 export const COMPUTE_QUEUE_NAME = 'compute-jobs';
 

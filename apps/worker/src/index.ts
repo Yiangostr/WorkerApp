@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Worker } from 'bullmq';
 import { redis, COMPUTE_QUEUE_NAME, ComputeJobPayloadSchema } from '@worker-app/queue';
-import { processJob } from './processor';
+import { processJob } from './processor.js';
 
 const CONCURRENCY = parseInt(process.env.WORKER_CONCURRENCY ?? '4', 10);
 
