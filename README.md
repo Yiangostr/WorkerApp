@@ -1,103 +1,16 @@
-# Worker App - Queue/Worker Computation System
+# Worker App
 
-A full-stack application demonstrating a queue/worker architecture with real-time updates, LLM-powered computations, and modern authentication.
-
-## Overview
-
-This application allows users to input two numbers (A and B) and processes 4 computational jobs (A+B, A-B, A\*B, A/B) through a scheduler-worker system. The system handles tasks asynchronously and displays real-time updates via WebSocket subscriptions.
-
-### Key Features
-
-- **Parallel Job Processing**: 4 concurrent workers process jobs simultaneously
-- **LLM-Powered Computations**: OpenAI API performs calculations with deterministic fallback
-- **Real-time Updates**: WebSocket subscriptions for live progress tracking
-- **Microsoft Entra ID Auth**: Secure OAuth authentication
-- **Type-Safe APIs**: End-to-end type safety with tRPC and Zod
-
-## Architecture
-
-```mermaid
-graph TB
-    subgraph frontend [Frontend]
-        Web[Next.js App]
-    end
-
-    subgraph backend [Backend Services]
-        API[tRPC API Server]
-        Worker[BullMQ Worker]
-    end
-
-    subgraph data [Data Layer]
-        Redis[(Redis)]
-        Mongo[(MongoDB)]
-    end
-
-    subgraph external [External]
-        Entra[Microsoft Entra ID]
-        OpenAI[OpenAI API]
-    end
-
-    Web -->|tRPC HTTP| API
-    Web -.->|WebSocket| API
-    API -->|Enqueue Jobs| Redis
-    API -->|CRUD| Mongo
-    API -->|OAuth| Entra
-
-    Worker -->|Poll Jobs| Redis
-    Worker -->|Update Results| Mongo
-    Worker -->|Publish Progress| Redis
-    Worker -->|Compute| OpenAI
-
-    Redis -.->|Pub/Sub| API
-```
-
-## Data Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Web
-    participant API
-    participant Redis
-    participant Worker
-    participant MongoDB
-    participant LLM
-
-    User->>Web: Enter numbers A, B
-    Web->>API: createRun(A, B)
-    API->>MongoDB: Create Run + 4 Jobs
-    API->>Redis: Enqueue 4 BullMQ jobs
-    API-->>Web: Return runId
-
-    Web->>API: Subscribe to progress
-
-    par Parallel Processing
-        Worker->>Redis: Dequeue job
-        Worker->>Worker: Sleep 3s (simulate processing)
-        Worker->>LLM: Calculate A op B
-        LLM-->>Worker: Result
-        Worker->>MongoDB: Save result
-        Worker->>Redis: Publish progress
-        Redis-->>API: Progress event
-        API-->>Web: Push update
-    end
-
-    Web->>User: Display results
-```
+A modular, scalable queue/worker application built with Next.js, tRPC, and BullMQ. Users input two numbers and the system performs 4 parallel computations (A+B, A−B, A×B, A÷B) using an LLM for calculations.
 
 ## Tech Stack
 
-| Category       | Technology                                    |
-| -------------- | --------------------------------------------- |
-| **Frontend**   | Next.js 15, React 19, Tailwind CSS, shadcn/ui |
-| **Backend**    | Node.js, tRPC, Better Auth                    |
-| **Queue**      | BullMQ, Redis                                 |
-| **Database**   | MongoDB (Prisma ORM)                          |
-| **Auth**       | Microsoft Entra ID (Azure AD)                 |
-| **LLM**        | Z.AI API (GLM-4.7)                            |
-| **Deployment** | Railway, Docker                               |
-| **CI/CD**      | GitHub Actions                                |
-| **Testing**    | Vitest                                        |
+- **Frontend**: Next.js 15, React 19, Tailwind CSS
+- **Backend**: Node.js, tRPC, WebSockets
+- **Database**: MongoDB Atlas (Prisma ORM)
+- **Queue**: BullMQ with Redis (Upstash)
+- **LLM**: Z.AI API (GLM-4.7 model)
+- **Auth**: Microsoft Entra ID (Better Auth)
+- **Monorepo**: Turborepo with pnpm
 
 ## Project Structure
 
@@ -106,151 +19,282 @@ WorkerApp/
 ├── apps/
 │   ├── web/          # Next.js frontend
 │   ├── api/          # tRPC API server
-│   └── worker/       # BullMQ worker process
+│   └── worker/       # BullMQ job processor
 ├── packages/
-│   ├── api/          # Shared tRPC routers & types
-│   ├── db/           # Prisma schema & client
-│   ├── queue/        # BullMQ queue definitions
-│   ├── llm/          # OpenAI client & parsing
-│   └── ui/           # Shared UI utilities
-├── tasks/            # Task documentation
-└── .github/workflows # CI/CD pipelines
+│   ├── api/          # Shared tRPC routers & schemas
+│   ├── db/           # Prisma client & schemas
+│   ├── queue/        # BullMQ queue & Redis
+│   ├── llm/          # LLM integration
+│   └── ui/           # Shared UI components
 ```
 
-## Getting Started
+---
+
+## Local Development
 
 ### Prerequisites
 
-- Node.js >= 20
-- pnpm 9.x
-- Docker (for local Redis/MongoDB)
-- MongoDB Atlas account (or local MongoDB)
-- OpenAI API key
+- Node.js 20+
+- pnpm 9+
+- Docker (for local Redis)
+- MongoDB Atlas account
 - Microsoft Entra ID app registration
+- Z.AI API key
 
-### Local Development
-
-1. **Clone and install**:
-
-   ```bash
-   git clone <repository-url>
-   cd WorkerApp
-   pnpm install
-   ```
-
-2. **Start local services**:
-
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Configure environment**:
-
-   ```bash
-   cp env.example .env
-   # Edit .env with your credentials
-   ```
-
-4. **Generate Prisma client**:
-
-   ```bash
-   pnpm --filter @worker-app/db db:generate
-   pnpm --filter @worker-app/db db:push
-   ```
-
-5. **Start all services**:
-
-   ```bash
-   pnpm dev
-   ```
-
-   This starts:
-   - Web: http://localhost:3000
-   - API: http://localhost:4000
-   - Worker: Background process
-
-### Running Tests
+### 1. Clone and Install
 
 ```bash
-pnpm test
+git clone https://github.com/Yiangostr/WorkerApp.git
+cd WorkerApp
+pnpm install
 ```
 
-## Environment Variables
+### 2. Set Up Environment Variables
 
-| Variable              | Description                                               | Required |
-| --------------------- | --------------------------------------------------------- | -------- |
-| `MONGODB_URI`         | MongoDB connection string                                 | Yes      |
-| `REDIS_URL`           | Redis connection string                                   | Yes      |
-| `LLM_API_KEY`         | Z.AI API key                                              | Yes      |
-| `LLM_BASE_URL`        | LLM API base URL (default: https://api.z.ai/api/paas/v4/) | No       |
-| `LLM_MODEL`           | Model to use (default: glm-4.7)                           | No       |
-| `AUTH_SECRET`         | Better Auth secret (32+ chars)                            | Yes      |
-| `ENTRA_CLIENT_ID`     | Azure App Client ID                                       | Yes      |
-| `ENTRA_CLIENT_SECRET` | Azure App Client Secret                                   | Yes      |
-| `ENTRA_TENANT_ID`     | Azure Tenant ID                                           | Yes      |
-| `NEXT_PUBLIC_APP_URL` | Frontend URL                                              | Yes      |
-| `NEXT_PUBLIC_API_URL` | API URL                                                   | Yes      |
-| `NEXT_PUBLIC_WS_URL`  | WebSocket URL                                             | Yes      |
+Create a `.env` file in the root directory:
 
-## Design Decisions
+```env
+# MongoDB Atlas
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/workerapp?appName=<app>
 
-### Why Turbo Monorepo?
+# Redis (local Docker)
+REDIS_URL=redis://localhost:6379
 
-- **Shared types**: Single source of truth for TypeScript types across all services
-- **Efficient builds**: Turbo caches build outputs, speeding up CI/CD
-- **Simplified dependency management**: One lockfile, consistent versions
+# LLM (Z.AI API)
+LLM_API_KEY=your-z-ai-api-key
+LLM_BASE_URL=https://api.z.ai/api/paas/v4/
+LLM_MODEL=glm-4.7
 
-### Why tRPC + Zod?
+# Auth Secret (generate with: openssl rand -base64 32)
+AUTH_SECRET=your-32-char-secret
 
-- **End-to-end type safety**: Types flow from API to frontend automatically
-- **Runtime validation**: Zod schemas validate data at runtime
-- **WebSocket subscriptions**: Built-in support for real-time updates
+# Microsoft Entra ID
+ENTRA_CLIENT_ID=your-azure-app-client-id
+ENTRA_CLIENT_SECRET=your-azure-app-client-secret
+ENTRA_TENANT_ID=your-azure-tenant-id
 
-### Why BullMQ?
+# URLs
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_WS_URL=ws://localhost:4000
 
-- **Reliable**: Redis-backed with automatic retries and failure handling
-- **Concurrent**: Configurable worker concurrency for parallel processing
-- **Observable**: Built-in events for job lifecycle tracking
+# Worker
+WORKER_CONCURRENCY=4
+```
 
-### Why LLM + Fallback?
+### 3. Start Redis (Docker)
 
-- **Demonstrates LLM integration**: Shows how to integrate AI into a workflow
-- **Reliability**: Deterministic fallback ensures correct results even if LLM fails
-- **Validation**: Zod validates LLM responses before use
+```bash
+docker run -d --name redis -p 6379:6379 redis:alpine
+```
 
-### Why Better Auth?
+### 4. Generate Prisma Client
 
-- **Modern OAuth**: Easy integration with multiple providers
-- **Prisma adapter**: Works seamlessly with MongoDB
-- **Type-safe**: Full TypeScript support
+```bash
+pnpm --filter @worker-app/db db:generate
+pnpm --filter @worker-app/db db:push
+```
 
-## Troubleshooting
+### 5. Run Development Servers
 
-### Worker not processing jobs
+```bash
+pnpm dev
+```
 
-1. Check Redis connection: `redis-cli ping`
-2. Verify `REDIS_URL` environment variable
-3. Check worker logs for errors
+This starts:
 
-### Authentication issues
+- **Web**: http://localhost:3000
+- **API**: http://localhost:4000
+- **Worker**: Background job processor
 
-1. Verify Entra ID credentials
-2. Check redirect URI in Azure portal matches: `{API_URL}/api/auth/callback/microsoft`
-3. Ensure `AUTH_SECRET` is set
+---
 
-### Database connection errors
+## Production Deployment (Railway)
 
-1. Verify `MONGODB_URI` format
-2. Check MongoDB Atlas network access (whitelist IP or allow all)
-3. Run `pnpm --filter @worker-app/db db:push` to sync schema
+### Prerequisites
 
-### Real-time updates not working
+- Railway account
+- GitHub repository connected to Railway
+- Upstash Redis account
+- MongoDB Atlas cluster
 
-1. Check WebSocket connection in browser devtools
-2. Verify `NEXT_PUBLIC_WS_URL` points to API server
-3. Check for CORS issues in API logs
+### 1. Create Railway Services
+
+Create 3 services in your Railway project:
+
+| Service      | Source      |
+| ------------ | ----------- |
+| `web`        | GitHub repo |
+| `api-server` | GitHub repo |
+| `worker`     | GitHub repo |
+
+### 2. Configure Each Service
+
+#### WEB Service
+
+**Settings → Build:**
+
+- **Builder**: Dockerfile
+- **Build command**: `pnpm install && pnpm --filter @worker-app/db db:generate && pnpm build`
+- **Watch patterns**: `/apps/web/**`, `/packages/**`
+
+**Settings → Deploy:**
+
+- **Start command**: `node apps/web/.next/standalone/apps/web/server.js`
+
+**Variables:**
+
+```
+MONGODB_URI=mongodb+srv://...
+REDIS_URL=rediss://default:...@....upstash.io:6379
+LLM_API_KEY=your-key
+LLM_BASE_URL=https://api.z.ai/api/paas/v4/
+LLM_MODEL=glm-4.7
+AUTH_SECRET=your-secret
+ENTRA_CLIENT_ID=your-client-id
+ENTRA_CLIENT_SECRET=your-client-secret
+ENTRA_TENANT_ID=your-tenant-id
+NEXT_PUBLIC_APP_URL=https://your-web-url.up.railway.app
+NEXT_PUBLIC_API_URL=https://your-api-url.up.railway.app
+NEXT_PUBLIC_WS_URL=wss://your-api-url.up.railway.app
+PORT=3000
+HOSTNAME=0.0.0.0
+```
+
+#### API-SERVER Service
+
+**Settings → Build:**
+
+- **Builder**: Dockerfile
+- **Build command**: `pnpm install && pnpm --filter @worker-app/db db:generate && pnpm build`
+- **Watch patterns**: `/apps/api/**`, `/packages/**`
+
+**Settings → Deploy:**
+
+- **Start command**: `node apps/api/dist/index.js`
+
+**Variables:**
+
+```
+MONGODB_URI=mongodb+srv://...
+REDIS_URL=rediss://default:...@....upstash.io:6379
+LLM_API_KEY=your-key
+LLM_BASE_URL=https://api.z.ai/api/paas/v4/
+LLM_MODEL=glm-4.7
+AUTH_SECRET=your-secret
+ENTRA_CLIENT_ID=your-client-id
+ENTRA_CLIENT_SECRET=your-client-secret
+ENTRA_TENANT_ID=your-tenant-id
+NEXT_PUBLIC_APP_URL=https://your-web-url.up.railway.app
+PORT=4000
+```
+
+#### WORKER Service
+
+**Settings → Build:**
+
+- **Builder**: Dockerfile
+- **Build command**: `pnpm install && pnpm --filter @worker-app/db db:generate && pnpm build`
+- **Watch patterns**: `/apps/worker/**`, `/packages/**`
+
+**Settings → Deploy:**
+
+- **Start command**: `node apps/worker/dist/index.js`
+
+**Variables:**
+
+```
+MONGODB_URI=mongodb+srv://...
+REDIS_URL=rediss://default:...@....upstash.io:6379
+LLM_API_KEY=your-key
+LLM_BASE_URL=https://api.z.ai/api/paas/v4/
+LLM_MODEL=glm-4.7
+AUTH_SECRET=your-secret
+ENTRA_CLIENT_ID=your-client-id
+ENTRA_CLIENT_SECRET=your-client-secret
+ENTRA_TENANT_ID=your-tenant-id
+WORKER_CONCURRENCY=4
+```
+
+### 3. Configure Microsoft Entra ID
+
+In Azure Portal → App Registrations → Your App → Authentication:
+
+**Redirect URIs:**
+
+```
+http://localhost:4000/api/auth/callback/microsoft
+https://your-api-url.up.railway.app/api/auth/callback/microsoft
+```
+
+### 4. Deploy
+
+Push to GitHub and Railway will auto-deploy all services.
+
+---
+
+## Scripts
+
+| Command          | Description                            |
+| ---------------- | -------------------------------------- |
+| `pnpm dev`       | Start all services in development mode |
+| `pnpm build`     | Build all packages and apps            |
+| `pnpm lint`      | Run ESLint on all packages             |
+| `pnpm typecheck` | Run TypeScript type checking           |
+| `pnpm test`      | Run all tests                          |
+| `pnpm clean`     | Clean all build artifacts              |
+
+---
+
+## API Endpoints
+
+### Health Check
+
+```
+GET /health
+```
+
+### Authentication
+
+```
+GET  /api/auth/sign-in/social?provider=microsoft
+POST /api/auth/sign-out
+GET  /api/auth/session
+```
+
+### tRPC
+
+```
+POST /trpc/compute.create    # Create computation run
+GET  /trpc/compute.getRun    # Get run status
+WS   /trpc/compute.subscribe # Real-time updates
+```
+
+---
+
+## Architecture
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Next.js   │────▶│  API Server │────▶│   MongoDB   │
+│    (Web)    │     │   (tRPC)    │     │   Atlas     │
+└─────────────┘     └──────┬──────┘     └─────────────┘
+                          │
+                          ▼
+                   ┌─────────────┐
+                   │    Redis    │
+                   │  (BullMQ)   │
+                   └──────┬──────┘
+                          │
+                          ▼
+                   ┌─────────────┐     ┌─────────────┐
+                   │   Worker    │────▶│   Z.AI LLM  │
+                   │  (BullMQ)   │     │  (GLM-4.7)  │
+                   └─────────────┘     └─────────────┘
+```
+
+## Contact me for .env
 
 ## License
 
 MIT
-
