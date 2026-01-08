@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build && npm run build:standalone",
-    "build:standalone": "cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public 2>/dev/null || true",
+    "build:standalone": "STANDALONE_DIR=$(find .next/standalone -name 'server.js' -path '*/apps/web/*' -exec dirname {} \\;) && cp -r .next/static \"$STANDALONE_DIR/.next/static\" && cp -r public \"$STANDALONE_DIR/public\" 2>/dev/null || true",
     "start": "next start",
     "start:standalone": "node .next/standalone/apps/web/server.js",
     "lint": "next lint",
