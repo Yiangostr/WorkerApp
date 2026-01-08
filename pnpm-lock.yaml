@@ -219,14 +219,14 @@ importers:
   packages/db:
     dependencies:
       '@prisma/client':
-        specifier: ^6.1.0
+        specifier: ~6.19.0
         version: 6.19.1(prisma@6.19.1(typescript@5.9.3))(typescript@5.9.3)
     devDependencies:
       '@worker-app/config-typescript':
         specifier: workspace:*
         version: link:../config-typescript
       prisma:
-        specifier: ^6.1.0
+        specifier: ~6.19.0
         version: 6.19.1(typescript@5.9.3)
       typescript:
         specifier: ^5.3.0

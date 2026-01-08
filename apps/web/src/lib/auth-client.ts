@@ -3,7 +3,22 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
 export async function signInWithMicrosoft() {
-  window.location.href = `${API_URL}/api/auth/sign-in/social?provider=microsoft&callbackURL=${encodeURIComponent(window.location.origin)}`;
+  const response = await fetch(`${API_URL}/api/auth/sign-in/social`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      provider: 'microsoft',
+      callbackURL: window.location.origin,
+    }),
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    if (data.url) {
+      window.location.href = data.url;
+    }
+  }
 }
 
 export async function signOut() {
