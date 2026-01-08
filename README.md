@@ -253,3 +253,4 @@ pnpm test
 ## License
 
 MIT
+
