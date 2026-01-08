@@ -80,13 +80,11 @@ applyWSSHandler({
   createContext: async (opts) => createContext({ req: opts.req }),
 });
 
-redis.connect().then(() => {
-  server.listen(PORT, () => {
-    console.log(`API server listening on http://localhost:${PORT}`);
-    console.log(`WebSocket server listening on ws://localhost:${PORT}`);
-    console.log(`Auth endpoints at http://localhost:${PORT}/api/auth/*`);
-    console.log(`Health check at http://localhost:${PORT}/health`);
-  });
+server.listen(PORT, () => {
+  console.log(`API server listening on http://localhost:${PORT}`);
+  console.log(`WebSocket server listening on ws://localhost:${PORT}`);
+  console.log(`Auth endpoints at http://localhost:${PORT}/api/auth/*`);
+  console.log(`Health check at http://localhost:${PORT}/health`);
 });
 
 process.on('SIGTERM', () => {

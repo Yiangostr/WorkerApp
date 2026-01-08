@@ -3,6 +3,7 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from '@worker-app/db';
 
 export const auth = betterAuth({
+  basePath: '/api/auth',
   database: prismaAdapter(prisma, { provider: 'mongodb' }),
   emailAndPassword: { enabled: false },
   socialProviders: {

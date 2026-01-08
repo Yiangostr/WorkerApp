@@ -6,11 +6,8 @@ import { processJob } from './processor';
 const CONCURRENCY = parseInt(process.env.WORKER_CONCURRENCY ?? '4', 10);
 
 async function main() {
-  // Connect to Redis
-  await redis.connect();
-  console.log('[Worker] Connected to Redis');
+  console.log('[Worker] Starting...');
 
-  // Create worker with concurrency
   const worker = new Worker(
     COMPUTE_QUEUE_NAME,
     async (job) => {

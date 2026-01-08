@@ -11,7 +11,6 @@ function createRedisClient(name: string): Redis {
   const client = new Redis(url, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
-    lazyConnect: true,
   });
 
   client.on('connect', () => console.log(`[Redis:${name}] Connected`));
