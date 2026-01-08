@@ -1,9 +1,20 @@
 'use client';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+function getApiUrl(): string {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+  }
+  if (window.location.hostname === 'localhost') {
+    return 'http://localhost:4000';
+  }
+  // Production: derive API URL from current domain
+  // worker-appweb-production -> worker-appapi-server-production
+  return window.location.origin.replace('appweb', 'appapi-server');
+}
 
 export async function signInWithMicrosoft() {
-  const response = await fetch(`${API_URL}/api/auth/sign-in/social`, {
+  const apiUrl = getApiUrl();
+  const response = await fetch(`${apiUrl}/api/auth/sign-in/social`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -22,7 +33,8 @@ export async function signInWithMicrosoft() {
 }
 
 export async function signOut() {
-  const response = await fetch(`${API_URL}/api/auth/sign-out`, {
+  const apiUrl = getApiUrl();
+  const response = await fetch(`${apiUrl}/api/auth/sign-out`, {
     method: 'POST',
     credentials: 'include',
   });
@@ -32,8 +44,9 @@ export async function signOut() {
 }
 
 export async function getSession() {
+  const apiUrl = getApiUrl();
   try {
-    const response = await fetch(`${API_URL}/api/auth/get-session`, {
+    const response = await fetch(`${apiUrl}/api/auth/get-session`, {
       credentials: 'include',
     });
     if (response.ok) {
