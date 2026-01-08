@@ -1,0 +1,33 @@
+{
+  "name": "@worker-app/api-server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup src/index.ts --format esm --dts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo node_modules"
+  },
+  "dependencies": {
+    "@trpc/server": "^11.0.0-rc.648",
+    "@worker-app/api": "workspace:*",
+    "@worker-app/db": "workspace:*",
+    "@worker-app/queue": "workspace:*",
+    "better-auth": "^1.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "superjson": "^2.2.1",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/ws": "^8.5.13",
+    "@worker-app/config-typescript": "workspace:*",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.3.0"
+  }
+}
