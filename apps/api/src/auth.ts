@@ -2,7 +2,10 @@ import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from '@worker-app/db';
 
+const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:4000';
+
 export const auth = betterAuth({
+  baseURL: API_BASE_URL,
   basePath: '/api/auth',
   database: prismaAdapter(prisma, { provider: 'mongodb' }),
   emailAndPassword: { enabled: false },
