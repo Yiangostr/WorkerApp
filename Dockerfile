@@ -4,19 +4,11 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
-# Copy everything
 COPY . .
 
-# Install dependencies
 RUN pnpm install --frozen-lockfile
-
-# Generate Prisma
 RUN pnpm --filter @worker-app/db db:generate
+RUN pnpm build
 
-# Build
-RUN pnpm --filter @worker-app/api-server build
-
-EXPOSE 4000
-ENV PORT=4000
-
+# Default - override with start command in Railway
 CMD ["node", "apps/api/dist/index.js"]
