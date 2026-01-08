@@ -28,7 +28,7 @@ export async function computeWithLLM(
   a: number,
   b: number,
   operation: Operation
-): Promise<{ result: number; llmResponse: string | null; usedFallback: boolean }> {
+): Promise<{ result: number; llmResponse: string; usedFallback: boolean }> {
   const symbol = operationSymbols[operation];
   const prompt = `Calculate ${a} ${symbol} ${b}. Respond ONLY with JSON: {"result": <number>}`;
 
@@ -38,7 +38,8 @@ export async function computeWithLLM(
       messages: [
         {
           role: 'system',
-          content: 'You are a calculator. Respond only with valid JSON containing the result.',
+          content:
+            'You are a precise calculator. Respond only with valid JSON containing the numeric result.',
         },
         { role: 'user', content: prompt },
       ],
@@ -48,22 +49,16 @@ export async function computeWithLLM(
 
     const llmResponse = response.choices[0]?.message?.content ?? '';
     const parsed = parseComputeResponse(llmResponse);
-    const expected = computeDeterministic(a, b, operation);
 
-    if (Math.abs(parsed.result - expected) > 0.0001) {
-      console.warn(
-        `[LLM] Result mismatch: LLM=${parsed.result}, expected=${expected}. Using fallback.`
-      );
-      return { result: expected, llmResponse, usedFallback: true };
-    }
+    console.log(`[LLM] ${a} ${symbol} ${b} = ${parsed.result} (from ${DEFAULT_MODEL})`);
 
     return { result: parsed.result, llmResponse, usedFallback: false };
   } catch (error) {
-    console.error('[LLM] Error:', error);
+    console.error('[LLM] Error, using fallback:', error);
     const result = computeDeterministic(a, b, operation);
     return {
       result,
-      llmResponse: error instanceof Error ? error.message : 'Unknown error',
+      llmResponse: `Fallback: ${error instanceof Error ? error.message : 'LLM unavailable'}`,
       usedFallback: true,
     };
   }
