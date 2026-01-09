@@ -44,7 +44,7 @@ export async function computeWithLLM(
         { role: 'user', content: prompt },
       ],
       temperature: 0,
-      max_tokens: 100,
+      max_tokens: 256,
     });
 
     const choice = response.choices[0]?.message;

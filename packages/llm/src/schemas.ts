@@ -7,9 +7,18 @@ export const ComputeResponseSchema = z.object({
 export type ComputeResponse = z.infer<typeof ComputeResponseSchema>;
 
 export function parseJsonFromResponse(text: string): unknown {
-  const jsonMatch = text.match(/\{[\s\S]*?\}/);
+  const jsonMatch = text.match(/\{\s*"result"\s*:\s*(-?\d+\.?\d*)\s*\}/);
   if (jsonMatch) {
-    return JSON.parse(jsonMatch[0]);
+    return { result: parseFloat(jsonMatch[1]) };
+  }
+
+  const looseJsonMatch = text.match(/\{[^}]*\}/);
+  if (looseJsonMatch) {
+    try {
+      return JSON.parse(looseJsonMatch[0]);
+    } catch {
+      // Continue to number extraction
+    }
   }
 
   const numberMatch = text.match(/-?\d+\.?\d*/);
@@ -17,7 +26,7 @@ export function parseJsonFromResponse(text: string): unknown {
     return { result: parseFloat(numberMatch[0]) };
   }
 
-  throw new Error(`No JSON or number found in response: ${text.slice(0, 100)}`);
+  throw new Error(`No JSON or number found in response: ${text.slice(0, 200)}`);
 }
 
 export function parseComputeResponse(text: string): ComputeResponse {
