@@ -46,31 +46,46 @@ const server = createServer(async (req, res) => {
 
   if (url.pathname.startsWith('/api/auth')) {
     const baseUrl = process.env.API_BASE_URL ?? `http://localhost:${PORT}`;
+    const contentType = req.headers['content-type'] ?? '';
+    
+    let body: string | undefined;
+    const headers = Object.fromEntries(
+      Object.entries(req.headers).map(([k, v]) => [
+        k,
+        Array.isArray(v) ? v.join(', ') : (v ?? ''),
+      ])
+    );
+
+    // Convert form data to JSON for Better Auth
+    if (req.method === 'POST' && contentType.includes('application/x-www-form-urlencoded')) {
+      const chunks: Buffer[] = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      const formData = Buffer.concat(chunks).toString();
+      const params = new URLSearchParams(formData);
+      body = JSON.stringify(Object.fromEntries(params.entries()));
+      headers['content-type'] = 'application/json';
+    }
+
     const authReq = new Request(`${baseUrl}${req.url}`, {
       method: req.method,
-      headers: Object.fromEntries(
-        Object.entries(req.headers).map(([k, v]) => [
-          k,
-          Array.isArray(v) ? v.join(', ') : (v ?? ''),
-        ])
-      ),
-      body:
-        req.method !== 'GET' && req.method !== 'HEAD'
-          ? (req as unknown as ReadableStream)
-          : undefined,
+      headers,
+      body: body ?? (req.method !== 'GET' && req.method !== 'HEAD' ? (req as unknown as ReadableStream) : undefined),
       duplex: 'half',
     } as RequestInit);
+    
     const response = await auth.handler(authReq);
 
     // Merge CORS headers with auth response headers
-    const headers: Record<string, string> = {};
+    const responseHeaders: Record<string, string> = {};
     response.headers.forEach((value, key) => {
-      headers[key] = value;
+      responseHeaders[key] = value;
     });
-    headers['Access-Control-Allow-Origin'] = origin;
-    headers['Access-Control-Allow-Credentials'] = 'true';
+    responseHeaders['Access-Control-Allow-Origin'] = origin;
+    responseHeaders['Access-Control-Allow-Credentials'] = 'true';
 
-    res.writeHead(response.status, headers);
+    res.writeHead(response.status, responseHeaders);
     res.end(await response.text());
     return;
   }

@@ -12,7 +12,7 @@ function getApiUrl(): string {
 
 export function signInWithMicrosoft() {
   const apiUrl = getApiUrl();
-  
+
   // Create a hidden form and submit it to handle cross-origin properly
   const form = document.createElement('form');
   form.method = 'POST';
@@ -37,7 +37,7 @@ export function signInWithMicrosoft() {
 
 export function signOut() {
   const apiUrl = getApiUrl();
-  
+
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = `${apiUrl}/api/auth/sign-out`;
