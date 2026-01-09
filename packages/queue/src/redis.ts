@@ -8,9 +8,12 @@ const globalForRedis = globalThis as unknown as {
 
 function createRedisClient(name: string): Redis {
   const url = process.env.REDIS_URL ?? 'redis://localhost:6379';
+  const useTls = url.startsWith('rediss://');
+
   const client = new Redis(url, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
+    tls: useTls ? { rejectUnauthorized: false } : undefined,
   });
 
   client.on('connect', () => console.log(`[Redis:${name}] Connected`));

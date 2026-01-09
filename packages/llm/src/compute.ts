@@ -39,15 +39,22 @@ export async function computeWithLLM(
         {
           role: 'system',
           content:
-            'You are a precise calculator. Respond only with valid JSON containing the numeric result.',
+            'You are a precise calculator. Respond only with valid JSON containing the numeric result. Example: {"result": 42}',
         },
         { role: 'user', content: prompt },
       ],
       temperature: 0,
-      max_tokens: 50,
+      max_tokens: 100,
     });
 
-    const llmResponse = response.choices[0]?.message?.content ?? '';
+    const choice = response.choices[0]?.message;
+    const llmResponse =
+      choice?.content ||
+      (choice as unknown as { reasoning_content?: string })?.reasoning_content ||
+      '';
+
+    console.log(`[LLM] Raw response for ${a} ${symbol} ${b}:`, llmResponse);
+
     const parsed = parseComputeResponse(llmResponse);
 
     console.log(`[LLM] ${a} ${symbol} ${b} = ${parsed.result} (from ${DEFAULT_MODEL})`);
