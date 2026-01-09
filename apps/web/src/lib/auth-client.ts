@@ -34,12 +34,7 @@ export function signInWithMicrosoft() {
 }
 
 function extractError(data: Record<string, unknown>, fallback: string): string {
-  return (
-    (data.message as string) ??
-    (data.error as string) ??
-    (data.code as string) ??
-    fallback
-  );
+  return (data.message as string) ?? (data.error as string) ?? (data.code as string) ?? fallback;
 }
 
 export async function signInWithEmail(
