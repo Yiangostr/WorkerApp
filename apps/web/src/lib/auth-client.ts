@@ -55,7 +55,8 @@ export async function signInWithEmail(
     });
     const data = await response.json();
     if (response.ok && data.user) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ user: data.user, token: data.token }));
+      const token = data.session?.token ?? data.token;
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ user: data.user, token }));
       window.location.reload();
       return { success: true };
     }
@@ -80,7 +81,8 @@ export async function signUpWithEmail(
     });
     const data = await response.json();
     if (response.ok && data.user) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ user: data.user, token: data.token }));
+      const token = data.session?.token ?? data.token;
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ user: data.user, token }));
       window.location.reload();
       return { success: true };
     }
@@ -109,14 +111,17 @@ export async function getSession(): Promise<{ user: { name: string; email: strin
   return null;
 }
 
-export async function fetchSessionFromApi(): Promise<{ user: { name: string; email: string } } | null> {
+export async function fetchSessionFromApi(): Promise<{
+  user: { name: string; email: string };
+} | null> {
   const apiUrl = getApiUrl();
   try {
     const response = await fetch(`${apiUrl}/api/auth/get-session`, { credentials: 'include' });
     if (response.ok) {
       const data = await response.json();
       if (data.user) {
-        localStorage.setItem(SESSION_KEY, JSON.stringify({ user: data.user }));
+        const token = data.session?.token ?? data.token;
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ user: data.user, token }));
         return { user: data.user };
       }
     }

@@ -9,6 +9,12 @@ export const auth = betterAuth({
   baseURL: API_BASE_URL,
   basePath: '/api/auth',
   database: prismaAdapter(prisma, { provider: 'mongodb' }),
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ['microsoft', 'email'],
+    },
+  },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,

@@ -4,7 +4,9 @@ import { prisma } from '@worker-app/db';
 
 export async function createContext(opts: { req: IncomingMessage }): Promise<Context> {
   const cookies = parseCookies(opts.req.headers.cookie ?? '');
-  const sessionToken = cookies['better-auth.session_token'];
+  const authHeader = opts.req.headers.authorization ?? '';
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const sessionToken = bearerToken ?? cookies['better-auth.session_token'];
 
   if (!sessionToken) {
     return { session: null, user: null };
