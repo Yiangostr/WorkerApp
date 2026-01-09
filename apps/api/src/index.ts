@@ -47,13 +47,10 @@ const server = createServer(async (req, res) => {
   if (url.pathname.startsWith('/api/auth')) {
     const baseUrl = process.env.API_BASE_URL ?? `http://localhost:${PORT}`;
     const contentType = req.headers['content-type'] ?? '';
-    
+
     let body: string | undefined;
     const headers = Object.fromEntries(
-      Object.entries(req.headers).map(([k, v]) => [
-        k,
-        Array.isArray(v) ? v.join(', ') : (v ?? ''),
-      ])
+      Object.entries(req.headers).map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : (v ?? '')])
     );
 
     // Convert form data to JSON for Better Auth
@@ -71,11 +68,16 @@ const server = createServer(async (req, res) => {
     const authReq = new Request(`${baseUrl}${req.url}`, {
       method: req.method,
       headers,
-      body: body ?? (req.method !== 'GET' && req.method !== 'HEAD' ? (req as unknown as ReadableStream) : undefined),
+      body:
+        body ??
+        (req.method !== 'GET' && req.method !== 'HEAD'
+          ? (req as unknown as ReadableStream)
+          : undefined),
       duplex: 'half',
     } as RequestInit);
-    
+
     const response = await auth.handler(authReq);
+    const responseText = await response.text();
 
     // Merge CORS headers with auth response headers
     const responseHeaders: Record<string, string> = {};
@@ -85,8 +87,22 @@ const server = createServer(async (req, res) => {
     responseHeaders['Access-Control-Allow-Origin'] = origin;
     responseHeaders['Access-Control-Allow-Credentials'] = 'true';
 
+    // If response is JSON with redirect URL, send actual redirect for form submissions
+    if (contentType.includes('application/x-www-form-urlencoded')) {
+      try {
+        const json = JSON.parse(responseText);
+        if (json.url && json.redirect) {
+          res.writeHead(302, { ...responseHeaders, Location: json.url });
+          res.end();
+          return;
+        }
+      } catch {
+        // Not JSON, continue with normal response
+      }
+    }
+
     res.writeHead(response.status, responseHeaders);
-    res.end(await response.text());
+    res.end(responseText);
     return;
   }
 
