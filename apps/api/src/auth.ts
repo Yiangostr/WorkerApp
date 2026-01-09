@@ -28,8 +28,10 @@ export const auth = betterAuth({
       domain: isProduction ? '.up.railway.app' : undefined,
     },
     defaultCookieAttributes: {
-      sameSite: 'none',
+      sameSite: 'lax',
       secure: isProduction,
+      httpOnly: true,
+      path: '/',
     },
   },
   trustedOrigins: [
