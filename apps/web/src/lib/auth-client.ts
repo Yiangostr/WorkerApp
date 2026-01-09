@@ -12,14 +12,45 @@ function getApiUrl(): string {
 
 export function signInWithMicrosoft() {
   const apiUrl = getApiUrl();
-  const callbackURL = encodeURIComponent(window.location.origin);
-  // Better Auth uses /signin/social format
-  window.location.href = `${apiUrl}/api/auth/signin/social?provider=microsoft&callbackURL=${callbackURL}`;
+  
+  // Create a hidden form and submit it to handle cross-origin properly
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = `${apiUrl}/api/auth/sign-in/social`;
+  form.style.display = 'none';
+
+  const providerInput = document.createElement('input');
+  providerInput.type = 'hidden';
+  providerInput.name = 'provider';
+  providerInput.value = 'microsoft';
+  form.appendChild(providerInput);
+
+  const callbackInput = document.createElement('input');
+  callbackInput.type = 'hidden';
+  callbackInput.name = 'callbackURL';
+  callbackInput.value = window.location.origin;
+  form.appendChild(callbackInput);
+
+  document.body.appendChild(form);
+  form.submit();
 }
 
 export function signOut() {
   const apiUrl = getApiUrl();
-  window.location.href = `${apiUrl}/api/auth/signout?callbackURL=${encodeURIComponent(window.location.origin)}`;
+  
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = `${apiUrl}/api/auth/sign-out`;
+  form.style.display = 'none';
+
+  const callbackInput = document.createElement('input');
+  callbackInput.type = 'hidden';
+  callbackInput.name = 'callbackURL';
+  callbackInput.value = window.location.origin;
+  form.appendChild(callbackInput);
+
+  document.body.appendChild(form);
+  form.submit();
 }
 
 export async function getSession() {
