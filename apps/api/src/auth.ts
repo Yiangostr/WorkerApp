@@ -23,6 +23,7 @@ export const auth = betterAuth({
     cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
   advanced: {
+    generateId: false,
     defaultCookieAttributes: {
       sameSite: 'lax',
       secure: isProduction,
