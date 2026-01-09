@@ -131,9 +131,33 @@ export async function fetchSessionFromApi(): Promise<{
   }
 }
 
+const ERROR_MESSAGES: Record<string, string> = {
+  email_not_found: 'Your Microsoft account does not have an email address. Please use a different account or sign up with email.',
+  account_not_linked: 'This Microsoft account is not linked to an existing account. Please sign up first or use email login.',
+  state_mismatch: 'Authentication session expired. Please try signing in again.',
+  access_denied: 'Access was denied. Please try again or use a different login method.',
+  unable_to_create_user: 'Could not create your account. Please try again or contact support.',
+};
+
+export function getAuthError(): string | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const error = params.get('error');
+  if (error) {
+    window.history.replaceState({}, '', window.location.pathname);
+    return ERROR_MESSAGES[error] ?? `Authentication error: ${error}`;
+  }
+  return null;
+}
+
 export function handleAuthCallback(): boolean {
   if (typeof window === 'undefined') return false;
   const params = new URLSearchParams(window.location.search);
+  
+  if (params.get('error')) {
+    return false;
+  }
+  
   if (params.get('auth') === 'callback') {
     fetchSessionFromApi().then(() => {
       window.history.replaceState({}, '', window.location.pathname);

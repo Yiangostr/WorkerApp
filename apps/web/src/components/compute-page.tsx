@@ -8,8 +8,8 @@ import { ResultsDisplay } from '@/components/results-display';
 import { AuthForm } from '@/components/auth-form';
 import { HistoryCard } from '@/components/history-card';
 import { trpc } from '@/lib/trpc';
-import { signOut, getSession, handleAuthCallback } from '@/lib/auth-client';
-import { LogOut, Sparkles } from 'lucide-react';
+import { signOut, getSession, handleAuthCallback, getAuthError } from '@/lib/auth-client';
+import { LogOut, Sparkles, AlertCircle, X } from 'lucide-react';
 import type { RunOutput, ProgressEvent } from '@worker-app/api';
 
 interface PageState {
@@ -17,6 +17,7 @@ interface PageState {
   sessionLoading: boolean;
   currentRunId: string | null;
   currentRun: RunOutput | null;
+  authError: string | null;
 }
 
 type PageAction =
@@ -25,6 +26,7 @@ type PageAction =
   | { type: 'SET_RUN_ID'; runId: string }
   | { type: 'SET_RUN'; run: RunOutput | null }
   | { type: 'UPDATE_JOB'; event: ProgressEvent }
+  | { type: 'SET_AUTH_ERROR'; error: string | null }
   | { type: 'RESET' };
 
 function pageReducer(state: PageState, action: PageAction): PageState {
@@ -60,6 +62,8 @@ function pageReducer(state: PageState, action: PageAction): PageState {
         },
       };
     }
+    case 'SET_AUTH_ERROR':
+      return { ...state, authError: action.error };
     case 'RESET':
       return { ...state, currentRunId: null, currentRun: null };
     default:
@@ -73,9 +77,14 @@ export function ComputePage() {
     sessionLoading: true,
     currentRunId: null,
     currentRun: null,
+    authError: null,
   });
 
   useEffect(() => {
+    const error = getAuthError();
+    if (error) {
+      dispatch({ type: 'SET_AUTH_ERROR', error });
+    }
     if (handleAuthCallback()) return;
     getSession().then((session) => {
       dispatch({ type: 'SET_SESSION', session });
@@ -138,6 +147,19 @@ export function ComputePage() {
           <h1 className="text-4xl font-bold text-white tracking-tight">Worker App</h1>
           <p className="text-slate-400">Queue-based parallel computations with LLM integration</p>
         </header>
+
+        {state.authError && (
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
+            <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 text-sm">{state.authError}</div>
+            <button
+              onClick={() => dispatch({ type: 'SET_AUTH_ERROR', error: null })}
+              className="p-1 hover:bg-red-500/20 rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
 
         <Card>
           <CardHeader>
