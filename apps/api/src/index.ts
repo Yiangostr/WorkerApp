@@ -49,14 +49,19 @@ const server = createServer(async (req, res) => {
     const authReq = new Request(`${baseUrl}${req.url}`, {
       method: req.method,
       headers: Object.fromEntries(
-        Object.entries(req.headers).map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : (v ?? '')])
+        Object.entries(req.headers).map(([k, v]) => [
+          k,
+          Array.isArray(v) ? v.join(', ') : (v ?? ''),
+        ])
       ),
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? (req as unknown as ReadableStream) : undefined,
-      // @ts-expect-error duplex is valid for Request with body
+      body:
+        req.method !== 'GET' && req.method !== 'HEAD'
+          ? (req as unknown as ReadableStream)
+          : undefined,
       duplex: 'half',
-    });
+    } as RequestInit);
     const response = await auth.handler(authReq);
-    
+
     // Merge CORS headers with auth response headers
     const headers: Record<string, string> = {};
     response.headers.forEach((value, key) => {
@@ -64,7 +69,7 @@ const server = createServer(async (req, res) => {
     });
     headers['Access-Control-Allow-Origin'] = origin;
     headers['Access-Control-Allow-Credentials'] = 'true';
-    
+
     res.writeHead(response.status, headers);
     res.end(await response.text());
     return;
