@@ -13,14 +13,13 @@ function getApiUrl(): string {
 export function signInWithMicrosoft() {
   const apiUrl = getApiUrl();
   const callbackURL = encodeURIComponent(window.location.origin);
-  // Redirect directly to auth endpoint instead of using fetch
-  window.location.href = `${apiUrl}/api/auth/sign-in/microsoft?callbackURL=${callbackURL}`;
+  // Better Auth uses /signin/social format
+  window.location.href = `${apiUrl}/api/auth/signin/social?provider=microsoft&callbackURL=${callbackURL}`;
 }
 
-export async function signOut() {
+export function signOut() {
   const apiUrl = getApiUrl();
-  // Redirect to sign out
-  window.location.href = `${apiUrl}/api/auth/sign-out?callbackURL=${encodeURIComponent(window.location.origin)}`;
+  window.location.href = `${apiUrl}/api/auth/signout?callbackURL=${encodeURIComponent(window.location.origin)}`;
 }
 
 export async function getSession() {
