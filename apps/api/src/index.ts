@@ -83,6 +83,12 @@ const server = createServer(async (req, res) => {
     const baseUrl = process.env.API_BASE_URL ?? `http://localhost:${PORT}`;
     const contentType = req.headers['content-type'] ?? '';
 
+    // Debug: Log incoming cookies on callback
+    if (url.pathname.includes('/callback/')) {
+      console.log('[Auth Callback] URL:', req.url);
+      console.log('[Auth Callback] Cookies:', req.headers.cookie ?? '(none)');
+    }
+
     let body: string | undefined;
     const headers = Object.fromEntries(
       Object.entries(req.headers).map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : (v ?? '')])
@@ -130,7 +136,7 @@ const server = createServer(async (req, res) => {
       const setCookies =
         typeof response.headers.getSetCookie === 'function'
           ? response.headers.getSetCookie()
-          : response.headers.get('set-cookie')?.split(/, (?=\w+=)/) ?? [];
+          : (response.headers.get('set-cookie')?.split(/, (?=\w+=)/) ?? []);
       if (setCookies.length > 0) {
         targetRes.setHeader('Set-Cookie', setCookies);
       }

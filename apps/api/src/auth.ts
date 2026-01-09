@@ -23,10 +23,6 @@ export const auth = betterAuth({
     cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
   advanced: {
-    crossSubDomainCookies: {
-      enabled: true,
-      domain: isProduction ? '.up.railway.app' : undefined,
-    },
     defaultCookieAttributes: {
       sameSite: 'lax',
       secure: isProduction,
