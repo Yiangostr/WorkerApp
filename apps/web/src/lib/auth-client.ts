@@ -12,8 +12,6 @@ function getApiUrl(): string {
 
 export function signInWithMicrosoft() {
   const apiUrl = getApiUrl();
-
-  // Create a hidden form and submit it to handle cross-origin properly
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = `${apiUrl}/api/auth/sign-in/social`;
@@ -35,9 +33,55 @@ export function signInWithMicrosoft() {
   form.submit();
 }
 
+export async function signInWithEmail(
+  email: string,
+  password: string
+): Promise<{ success: boolean; error?: string }> {
+  const apiUrl = getApiUrl();
+  try {
+    const response = await fetch(`${apiUrl}/api/auth/sign-in/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      window.location.reload();
+      return { success: true };
+    }
+    return { success: false, error: data.message ?? 'Sign in failed' };
+  } catch {
+    return { success: false, error: 'Network error' };
+  }
+}
+
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  name: string
+): Promise<{ success: boolean; error?: string }> {
+  const apiUrl = getApiUrl();
+  try {
+    const response = await fetch(`${apiUrl}/api/auth/sign-up/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password, name }),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      window.location.reload();
+      return { success: true };
+    }
+    return { success: false, error: data.message ?? 'Sign up failed' };
+  } catch {
+    return { success: false, error: 'Network error' };
+  }
+}
+
 export function signOut() {
   const apiUrl = getApiUrl();
-
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = `${apiUrl}/api/auth/sign-out`;
@@ -60,8 +104,7 @@ export async function getSession() {
       credentials: 'include',
     });
     if (response.ok) {
-      const data = await response.json();
-      return data;
+      return await response.json();
     }
     return null;
   } catch {

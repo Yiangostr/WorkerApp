@@ -5,40 +5,14 @@ import { prisma } from '@worker-app/db';
 const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:4000';
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Wrap prisma with error logging
-const prismaWithLogging = new Proxy(prisma, {
-  get(target, prop) {
-    const value = target[prop as keyof typeof target];
-    if (typeof value === 'object' && value !== null) {
-      return new Proxy(value, {
-        get(modelTarget, modelProp) {
-          const modelValue = modelTarget[modelProp as keyof typeof modelTarget];
-          if (typeof modelValue === 'function') {
-            return async (...args: unknown[]) => {
-              try {
-                console.log(`[Prisma] ${String(prop)}.${String(modelProp)}`, JSON.stringify(args[0]));
-                const result = await (modelValue as (...args: unknown[]) => Promise<unknown>).apply(modelTarget, args);
-                console.log(`[Prisma] ${String(prop)}.${String(modelProp)} success`);
-                return result;
-              } catch (error) {
-                console.error(`[Prisma] ${String(prop)}.${String(modelProp)} ERROR:`, error);
-                throw error;
-              }
-            };
-          }
-          return modelValue;
-        },
-      });
-    }
-    return value;
-  },
-});
-
 export const auth = betterAuth({
   baseURL: API_BASE_URL,
   basePath: '/api/auth',
-  database: prismaAdapter(prismaWithLogging as typeof prisma, { provider: 'mongodb' }),
-  emailAndPassword: { enabled: false },
+  database: prismaAdapter(prisma, { provider: 'mongodb' }),
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
+  },
   socialProviders: {
     microsoft: {
       clientId: process.env.ENTRA_CLIENT_ID!,

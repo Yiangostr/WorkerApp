@@ -5,9 +5,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ComputeForm } from '@/components/compute-form';
 import { ResultsDisplay } from '@/components/results-display';
+import { AuthForm } from '@/components/auth-form';
 import { trpc } from '@/lib/trpc';
-import { signInWithMicrosoft, signOut, getSession } from '@/lib/auth-client';
-import { LogIn, LogOut, Sparkles } from 'lucide-react';
+import { signOut, getSession } from '@/lib/auth-client';
+import { LogOut, Sparkles } from 'lucide-react';
 import type { RunOutput, ProgressEvent } from '@worker-app/api';
 
 interface PageState {
@@ -132,23 +133,25 @@ export function ComputePage() {
         </header>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle>Authentication</CardTitle>
+          </CardHeader>
+          <CardContent>
             {state.session ? (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-slate-400">{state.session.user.email}</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-white">{state.session.user.name ?? 'User'}</p>
+                  <p className="text-sm text-slate-400">{state.session.user.email}</p>
+                </div>
                 <Button variant="outline" size="sm" onClick={signOut}>
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
                 </Button>
               </div>
             ) : (
-              <Button onClick={signInWithMicrosoft} disabled={state.sessionLoading}>
-                <LogIn className="h-4 w-4" />
-                Sign in with Microsoft
-              </Button>
+              <AuthForm disabled={state.sessionLoading} />
             )}
-          </CardHeader>
+          </CardContent>
         </Card>
 
         <Card>
