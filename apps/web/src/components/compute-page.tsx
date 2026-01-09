@@ -83,7 +83,7 @@ export function ComputePage() {
   }, []);
 
   const historyQuery = trpc.compute.getHistory.useQuery(
-    { limit: 10 },
+    { limit: 50 },
     { enabled: !!state.session }
   );
 
@@ -133,7 +133,6 @@ export function ComputePage() {
       <div className="max-w-2xl mx-auto space-y-8">
         <header className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 text-sm font-medium">
-            <Sparkles className="h-4 w-4" />
             AI-Powered Computations
           </div>
           <h1 className="text-4xl font-bold text-white tracking-tight">Worker App</h1>
@@ -167,7 +166,11 @@ export function ComputePage() {
             <CardTitle>Compute</CardTitle>
           </CardHeader>
           <CardContent>
-            <ComputeForm onCompute={handleCompute} isLoading={isComputing} disabled={!state.session} />
+            <ComputeForm
+              onCompute={handleCompute}
+              isLoading={isComputing}
+              disabled={!state.session}
+            />
             {!state.session && !state.sessionLoading && (
               <p className="text-sm text-amber-400 mt-4 text-center">
                 Please sign in to perform computations

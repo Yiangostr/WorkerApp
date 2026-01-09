@@ -1,9 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useReducer } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Clock, CheckCircle, XCircle, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { HistoryRun } from '@worker-app/api';
+
+const PAGE_SIZE = 4;
 
 interface HistoryCardProps {
   runs: HistoryRun[];
@@ -40,14 +43,23 @@ function StatusIcon({ status }: { status: string }) {
 }
 
 export function HistoryCard({ runs, isLoading }: HistoryCardProps) {
+  const [page, setPage] = useReducer((_: number, action: 'next' | 'prev' | 'reset') => {
+    if (action === 'reset') return 0;
+    if (action === 'next') return _ + 1;
+    return Math.max(0, _ - 1);
+  }, 0);
+
+  const totalPages = Math.ceil(runs.length / PAGE_SIZE);
+  const paginatedRuns = useMemo(() => runs.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [runs, page]);
+
   const formattedRuns = useMemo(
     () =>
-      runs.map((run) => ({
+      paginatedRuns.map((run) => ({
         ...run,
         formattedDate: formatDate(run.createdAt),
         expression: `${run.numberA} & ${run.numberB}`,
       })),
-    [runs]
+    [paginatedRuns]
   );
 
   if (isLoading) {
@@ -128,6 +140,31 @@ export function HistoryCard({ runs, isLoading }: HistoryCardProps) {
             </div>
           </div>
         ))}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-2 border-t border-slate-700/50">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPage('prev')}
+              disabled={page === 0}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Prev
+            </Button>
+            <span className="text-xs text-slate-400">
+              {page + 1} / {totalPages}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPage('next')}
+              disabled={page >= totalPages - 1}
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
