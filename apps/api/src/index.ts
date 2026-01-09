@@ -45,9 +45,27 @@ const server = createServer(async (req, res) => {
   }
 
   if (url.pathname.startsWith('/api/auth')) {
-    const authReq = nodeToFetchRequest(req, PORT);
+    const baseUrl = process.env.API_BASE_URL ?? `http://localhost:${PORT}`;
+    const authReq = new Request(`${baseUrl}${req.url}`, {
+      method: req.method,
+      headers: Object.fromEntries(
+        Object.entries(req.headers).map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : (v ?? '')])
+      ),
+      body: req.method !== 'GET' && req.method !== 'HEAD' ? (req as unknown as ReadableStream) : undefined,
+      // @ts-expect-error duplex is valid for Request with body
+      duplex: 'half',
+    });
     const response = await auth.handler(authReq);
-    res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+    
+    // Merge CORS headers with auth response headers
+    const headers: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    headers['Access-Control-Allow-Origin'] = origin;
+    headers['Access-Control-Allow-Credentials'] = 'true';
+    
+    res.writeHead(response.status, headers);
     res.end(await response.text());
     return;
   }
