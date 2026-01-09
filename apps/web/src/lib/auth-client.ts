@@ -1,5 +1,7 @@
 'use client';
 
+const SESSION_KEY = 'worker-app-session';
+
 function getApiUrl(): string {
   if (typeof window === 'undefined') {
     return process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
@@ -10,8 +12,14 @@ function getApiUrl(): string {
   return window.location.origin.replace('appweb', 'appapi-server');
 }
 
+function extractError(data: Record<string, unknown>, fallback: string): string {
+  return (data.message as string) ?? (data.error as string) ?? (data.code as string) ?? fallback;
+}
+
 export function signInWithMicrosoft() {
   const apiUrl = getApiUrl();
+  const callbackUrl = `${window.location.origin}?auth=callback`;
+
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = `${apiUrl}/api/auth/sign-in/social`;
@@ -26,15 +34,11 @@ export function signInWithMicrosoft() {
   const callbackInput = document.createElement('input');
   callbackInput.type = 'hidden';
   callbackInput.name = 'callbackURL';
-  callbackInput.value = window.location.origin;
+  callbackInput.value = callbackUrl;
   form.appendChild(callbackInput);
 
   document.body.appendChild(form);
   form.submit();
-}
-
-function extractError(data: Record<string, unknown>, fallback: string): string {
-  return (data.message as string) ?? (data.error as string) ?? (data.code as string) ?? fallback;
 }
 
 export async function signInWithEmail(
@@ -50,7 +54,8 @@ export async function signInWithEmail(
       body: JSON.stringify({ email, password }),
     });
     const data = await response.json();
-    if (response.ok) {
+    if (response.ok && data.user) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ user: data.user, token: data.token }));
       window.location.reload();
       return { success: true };
     }
@@ -74,7 +79,8 @@ export async function signUpWithEmail(
       body: JSON.stringify({ email, password, name }),
     });
     const data = await response.json();
-    if (response.ok) {
+    if (response.ok && data.user) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ user: data.user, token: data.token }));
       window.location.reload();
       return { success: true };
     }
@@ -85,33 +91,50 @@ export async function signUpWithEmail(
 }
 
 export function signOut() {
-  const apiUrl = getApiUrl();
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = `${apiUrl}/api/auth/sign-out`;
-  form.style.display = 'none';
-
-  const callbackInput = document.createElement('input');
-  callbackInput.type = 'hidden';
-  callbackInput.name = 'callbackURL';
-  callbackInput.value = window.location.origin;
-  form.appendChild(callbackInput);
-
-  document.body.appendChild(form);
-  form.submit();
+  localStorage.removeItem(SESSION_KEY);
+  window.location.reload();
 }
 
-export async function getSession() {
+export async function getSession(): Promise<{ user: { name: string; email: string } } | null> {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem(SESSION_KEY);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed.user) return { user: parsed.user };
+    } catch {
+      localStorage.removeItem(SESSION_KEY);
+    }
+  }
+  return null;
+}
+
+export async function fetchSessionFromApi(): Promise<{ user: { name: string; email: string } } | null> {
   const apiUrl = getApiUrl();
   try {
-    const response = await fetch(`${apiUrl}/api/auth/get-session`, {
-      credentials: 'include',
-    });
+    const response = await fetch(`${apiUrl}/api/auth/get-session`, { credentials: 'include' });
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+      if (data.user) {
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ user: data.user }));
+        return { user: data.user };
+      }
     }
     return null;
   } catch {
     return null;
   }
+}
+
+export function handleAuthCallback(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('auth') === 'callback') {
+    fetchSessionFromApi().then(() => {
+      window.history.replaceState({}, '', window.location.pathname);
+      window.location.reload();
+    });
+    return true;
+  }
+  return false;
 }

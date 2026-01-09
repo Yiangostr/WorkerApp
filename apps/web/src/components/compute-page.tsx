@@ -7,7 +7,7 @@ import { ComputeForm } from '@/components/compute-form';
 import { ResultsDisplay } from '@/components/results-display';
 import { AuthForm } from '@/components/auth-form';
 import { trpc } from '@/lib/trpc';
-import { signOut, getSession } from '@/lib/auth-client';
+import { signOut, getSession, handleAuthCallback } from '@/lib/auth-client';
 import { LogOut, Sparkles } from 'lucide-react';
 import type { RunOutput, ProgressEvent } from '@worker-app/api';
 
@@ -75,6 +75,7 @@ export function ComputePage() {
   });
 
   useEffect(() => {
+    if (handleAuthCallback()) return;
     getSession().then((session) => {
       dispatch({ type: 'SET_SESSION', session });
     });
