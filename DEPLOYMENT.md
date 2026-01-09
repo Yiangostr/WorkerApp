@@ -38,16 +38,19 @@ In Railway dashboard:
 Create three services in Railway dashboard, each linked to the GitHub repo:
 
 **web service**:
+
 - Root Directory: `/`
 - Build Command: `pnpm install && pnpm --filter @worker-app/db db:generate && pnpm build`
 - Start Command: `node apps/web/.next/standalone/apps/web/server.js`
 
 **api service**:
+
 - Root Directory: `/`
 - Build Command: `pnpm install && pnpm --filter @worker-app/db db:generate && pnpm --filter @worker-app/db db:push && pnpm build`
 - Start Command: `node apps/api/dist/index.js`
 
 **worker service**:
+
 - Root Directory: `/`
 - Build Command: `pnpm install && pnpm --filter @worker-app/db db:generate && pnpm build`
 - Start Command: `node apps/worker/dist/index.js`
