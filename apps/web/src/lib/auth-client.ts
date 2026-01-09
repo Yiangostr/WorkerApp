@@ -33,6 +33,15 @@ export function signInWithMicrosoft() {
   form.submit();
 }
 
+function extractError(data: Record<string, unknown>, fallback: string): string {
+  return (
+    (data.message as string) ??
+    (data.error as string) ??
+    (data.code as string) ??
+    fallback
+  );
+}
+
 export async function signInWithEmail(
   email: string,
   password: string
@@ -50,7 +59,7 @@ export async function signInWithEmail(
       window.location.reload();
       return { success: true };
     }
-    return { success: false, error: data.message ?? 'Sign in failed' };
+    return { success: false, error: extractError(data, 'Invalid email or password') };
   } catch {
     return { success: false, error: 'Network error' };
   }
@@ -74,7 +83,7 @@ export async function signUpWithEmail(
       window.location.reload();
       return { success: true };
     }
-    return { success: false, error: data.message ?? 'Sign up failed' };
+    return { success: false, error: extractError(data, 'Sign up failed') };
   } catch {
     return { success: false, error: 'Network error' };
   }

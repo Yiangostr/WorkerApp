@@ -53,12 +53,18 @@ export function AuthForm({ disabled }: AuthFormProps) {
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+
+      if (state.mode === 'signup' && !state.name.trim()) {
+        dispatch({ type: 'SET_ERROR', error: 'Name is required' });
+        return;
+      }
+
       dispatch({ type: 'SET_LOADING', loading: true });
 
       const result =
         state.mode === 'signin'
           ? await signInWithEmail(state.email, state.password)
-          : await signUpWithEmail(state.email, state.password, state.name);
+          : await signUpWithEmail(state.email, state.password, state.name.trim());
 
       if (!result.success) {
         dispatch({ type: 'SET_ERROR', error: result.error ?? 'An error occurred' });
@@ -77,6 +83,7 @@ export function AuthForm({ disabled }: AuthFormProps) {
             value={state.name}
             onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'name', value: e.target.value })}
             disabled={state.loading || disabled}
+            required
           />
         )}
         <Input
