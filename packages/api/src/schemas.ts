@@ -57,3 +57,26 @@ export const ProgressEventSchema = z.object({
 });
 
 export type ProgressEvent = z.infer<typeof ProgressEventSchema>;
+
+export const GetHistoryInputSchema = z.object({
+  limit: z.number().min(1).max(50).optional().default(10),
+});
+
+export type GetHistoryInput = z.infer<typeof GetHistoryInputSchema>;
+
+export const HistoryRunSchema = z.object({
+  id: z.string(),
+  numberA: z.number(),
+  numberB: z.number(),
+  status: RunStatusSchema,
+  createdAt: z.date(),
+  jobs: z.array(
+    z.object({
+      operation: OperationSchema,
+      status: JobStatusSchema,
+      result: z.number().nullable(),
+    })
+  ),
+});
+
+export type HistoryRun = z.infer<typeof HistoryRunSchema>;

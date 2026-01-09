@@ -7,7 +7,9 @@ import {
   CreateRunInputSchema,
   GetRunInputSchema,
   SubscribeRunInputSchema,
+  GetHistoryInputSchema,
   RunSchema,
+  HistoryRunSchema,
   ProgressEventSchema,
 } from '../schemas.js';
 
@@ -43,6 +45,30 @@ export const computeRouter = router({
     });
 
     return { runId: run.id };
+  }),
+
+  getHistory: protectedProcedure.input(GetHistoryInputSchema).query(async ({ ctx, input }) => {
+    const runs = await prisma.computationRun.findMany({
+      where: { userId: ctx.user.id },
+      orderBy: { createdAt: 'desc' },
+      take: input.limit,
+      include: { jobs: true },
+    });
+
+    return runs.map((run) =>
+      HistoryRunSchema.parse({
+        id: run.id,
+        numberA: run.numberA,
+        numberB: run.numberB,
+        status: run.status,
+        createdAt: run.createdAt,
+        jobs: run.jobs.map((job) => ({
+          operation: job.operation,
+          status: job.status,
+          result: job.result,
+        })),
+      })
+    );
   }),
 
   getRun: publicProcedure.input(GetRunInputSchema).query(async ({ input }) => {

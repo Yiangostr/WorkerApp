@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ComputeForm } from '@/components/compute-form';
 import { ResultsDisplay } from '@/components/results-display';
 import { AuthForm } from '@/components/auth-form';
+import { HistoryCard } from '@/components/history-card';
 import { trpc } from '@/lib/trpc';
 import { signOut, getSession, handleAuthCallback } from '@/lib/auth-client';
 import { LogOut, Sparkles } from 'lucide-react';
@@ -81,9 +82,15 @@ export function ComputePage() {
     });
   }, []);
 
+  const historyQuery = trpc.compute.getHistory.useQuery(
+    { limit: 10 },
+    { enabled: !!state.session }
+  );
+
   const createMutation = trpc.compute.create.useMutation({
     onSuccess: (data) => {
       dispatch({ type: 'SET_RUN_ID', runId: data.runId });
+      historyQuery.refetch();
     },
   });
 
@@ -181,6 +188,10 @@ export function ComputePage() {
               />
             </CardContent>
           </Card>
+        )}
+
+        {state.session && (
+          <HistoryCard runs={historyQuery.data ?? []} isLoading={historyQuery.isLoading} />
         )}
       </div>
     </main>
