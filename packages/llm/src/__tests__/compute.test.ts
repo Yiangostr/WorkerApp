@@ -44,8 +44,8 @@ describe('parseJsonFromResponse', () => {
     expect(result).toEqual({ result: 42 });
   });
 
-  it('should throw if no JSON found', () => {
-    expect(() => parseJsonFromResponse('No JSON here')).toThrow('No JSON found');
+  it('should throw if no JSON or number found', () => {
+    expect(() => parseJsonFromResponse('No JSON here')).toThrow('No JSON or number found');
   });
 });
 
