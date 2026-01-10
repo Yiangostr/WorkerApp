@@ -10,6 +10,8 @@
     "start:standalone": "node .next/standalone/apps/web/server.js",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
@@ -30,10 +32,14 @@
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
     "@worker-app/config-typescript": "workspace:*",
     "autoprefixer": "^10.4.20",
+    "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.3.0"
