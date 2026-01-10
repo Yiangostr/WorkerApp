@@ -17,6 +17,7 @@ async function main() {
     {
       connection: redis,
       concurrency: CONCURRENCY,
+      drainDelay: 30000,
     }
   );
 
