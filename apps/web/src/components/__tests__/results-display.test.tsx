@@ -3,6 +3,19 @@ import { render, screen } from '@testing-library/react';
 import { ResultsDisplay } from '../results-display';
 import type { RunOutput } from '@worker-app/api';
 
+type JobOutput = RunOutput['jobs'][number];
+
+const createMockJob = (overrides: Partial<JobOutput>): JobOutput => ({
+  id: 'job-1',
+  operation: 'ADD',
+  status: 'PENDING',
+  result: null,
+  error: null,
+  startedAt: null,
+  completedAt: null,
+  ...overrides,
+});
+
 const createMockRun = (overrides: Partial<RunOutput> = {}): RunOutput => ({
   id: 'run-123',
   status: 'IN_PROGRESS',
@@ -10,10 +23,10 @@ const createMockRun = (overrides: Partial<RunOutput> = {}): RunOutput => ({
   numberB: 5,
   createdAt: new Date(),
   jobs: [
-    { id: 'job-1', operation: 'ADD', status: 'PENDING', result: null, error: null },
-    { id: 'job-2', operation: 'SUBTRACT', status: 'PENDING', result: null, error: null },
-    { id: 'job-3', operation: 'MULTIPLY', status: 'PENDING', result: null, error: null },
-    { id: 'job-4', operation: 'DIVIDE', status: 'PENDING', result: null, error: null },
+    createMockJob({ id: 'job-1', operation: 'ADD' }),
+    createMockJob({ id: 'job-2', operation: 'SUBTRACT' }),
+    createMockJob({ id: 'job-3', operation: 'MULTIPLY' }),
+    createMockJob({ id: 'job-4', operation: 'DIVIDE' }),
   ],
   ...overrides,
 });
@@ -46,10 +59,10 @@ describe('ResultsDisplay', () => {
   it('updates progress as jobs complete', () => {
     const run = createMockRun({
       jobs: [
-        { id: 'job-1', operation: 'ADD', status: 'COMPLETED', result: 15, error: null },
-        { id: 'job-2', operation: 'SUBTRACT', status: 'COMPLETED', result: 5, error: null },
-        { id: 'job-3', operation: 'MULTIPLY', status: 'IN_PROGRESS', result: null, error: null },
-        { id: 'job-4', operation: 'DIVIDE', status: 'PENDING', result: null, error: null },
+        createMockJob({ id: 'job-1', operation: 'ADD', status: 'COMPLETED', result: 15 }),
+        createMockJob({ id: 'job-2', operation: 'SUBTRACT', status: 'COMPLETED', result: 5 }),
+        createMockJob({ id: 'job-3', operation: 'MULTIPLY', status: 'IN_PROGRESS' }),
+        createMockJob({ id: 'job-4', operation: 'DIVIDE', status: 'PENDING' }),
       ],
     });
 
@@ -61,10 +74,10 @@ describe('ResultsDisplay', () => {
     const run = createMockRun({
       status: 'COMPLETED',
       jobs: [
-        { id: 'job-1', operation: 'ADD', status: 'COMPLETED', result: 15, error: null },
-        { id: 'job-2', operation: 'SUBTRACT', status: 'COMPLETED', result: 5, error: null },
-        { id: 'job-3', operation: 'MULTIPLY', status: 'COMPLETED', result: 50, error: null },
-        { id: 'job-4', operation: 'DIVIDE', status: 'COMPLETED', result: 2, error: null },
+        createMockJob({ id: 'job-1', operation: 'ADD', status: 'COMPLETED', result: 15 }),
+        createMockJob({ id: 'job-2', operation: 'SUBTRACT', status: 'COMPLETED', result: 5 }),
+        createMockJob({ id: 'job-3', operation: 'MULTIPLY', status: 'COMPLETED', result: 50 }),
+        createMockJob({ id: 'job-4', operation: 'DIVIDE', status: 'COMPLETED', result: 2 }),
       ],
     });
 
@@ -76,16 +89,15 @@ describe('ResultsDisplay', () => {
     const run = createMockRun({
       status: 'FAILED',
       jobs: [
-        { id: 'job-1', operation: 'ADD', status: 'COMPLETED', result: 15, error: null },
-        { id: 'job-2', operation: 'SUBTRACT', status: 'COMPLETED', result: 5, error: null },
-        { id: 'job-3', operation: 'MULTIPLY', status: 'COMPLETED', result: 50, error: null },
-        {
+        createMockJob({ id: 'job-1', operation: 'ADD', status: 'COMPLETED', result: 15 }),
+        createMockJob({ id: 'job-2', operation: 'SUBTRACT', status: 'COMPLETED', result: 5 }),
+        createMockJob({ id: 'job-3', operation: 'MULTIPLY', status: 'COMPLETED', result: 50 }),
+        createMockJob({
           id: 'job-4',
           operation: 'DIVIDE',
           status: 'FAILED',
-          result: null,
           error: 'Division by zero',
-        },
+        }),
       ],
     });
 
@@ -99,10 +111,10 @@ describe('ResultsDisplay', () => {
     const run = createMockRun({
       status: 'COMPLETED',
       jobs: [
-        { id: 'job-1', operation: 'ADD', status: 'COMPLETED', result: 15, error: null },
-        { id: 'job-2', operation: 'SUBTRACT', status: 'COMPLETED', result: 5, error: null },
-        { id: 'job-3', operation: 'MULTIPLY', status: 'COMPLETED', result: 50, error: null },
-        { id: 'job-4', operation: 'DIVIDE', status: 'COMPLETED', result: 2, error: null },
+        createMockJob({ id: 'job-1', operation: 'ADD', status: 'COMPLETED', result: 15 }),
+        createMockJob({ id: 'job-2', operation: 'SUBTRACT', status: 'COMPLETED', result: 5 }),
+        createMockJob({ id: 'job-3', operation: 'MULTIPLY', status: 'COMPLETED', result: 50 }),
+        createMockJob({ id: 'job-4', operation: 'DIVIDE', status: 'COMPLETED', result: 2 }),
       ],
     });
 
