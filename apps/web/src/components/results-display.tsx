@@ -3,6 +3,8 @@
 import { useMemo } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { JobCard } from '@/components/job-card';
+import { useMessages } from '@/lib/i18n/i18n-provider';
+import { interpolate } from '@/lib/i18n/messages';
 import type { RunOutput } from '@worker-app/api';
 
 interface ResultsDisplayProps {
@@ -11,6 +13,7 @@ interface ResultsDisplayProps {
 }
 
 export function ResultsDisplay({ run, isSubscribed }: ResultsDisplayProps) {
+  const t = useMessages('compute');
   const progressData = useMemo(() => {
     if (!run) return { completed: 0, total: 4, percent: 0 };
 
@@ -31,12 +34,12 @@ export function ResultsDisplay({ run, isSubscribed }: ResultsDisplayProps) {
     <div className="space-y-6">
       {showProgress && (
         <div className="space-y-2">
-          <div className="flex justify-between text-sm text-slate-400">
+          <div className="flex justify-between text-sm text-muted-foreground">
             <span>
-              {isSubscribed ? 'Computing...' : 'Loading...'}
+              {isSubscribed ? t.results.computing : t.results.loading}
             </span>
             <span>
-              {progressData.completed} of {progressData.total} jobs finished
+              {interpolate(t.results.jobsFinished, { completed: progressData.completed, total: progressData.total })}
             </span>
           </div>
           <Progress value={progressData.percent} />
@@ -58,14 +61,14 @@ export function ResultsDisplay({ run, isSubscribed }: ResultsDisplayProps) {
       </div>
 
       {run.status === 'COMPLETED' && (
-        <div className="text-center text-emerald-400 text-sm">
-          All computations completed successfully!
+        <div className="text-center text-primary text-sm">
+          {t.results.allCompleted}
         </div>
       )}
 
       {run.status === 'FAILED' && (
-        <div className="text-center text-red-400 text-sm">
-          Some computations failed. Check individual results above.
+        <div className="text-center text-destructive text-sm">
+          {t.results.someFailed}
         </div>
       )}
     </div>

@@ -1,0 +1,7 @@
+{
+  "title": "Verlauf",
+  "empty": "Noch keine Berechnungen",
+  "prev": "Zurück",
+  "next": "Weiter",
+  "pageInfo": "{current} / {total}"
+}

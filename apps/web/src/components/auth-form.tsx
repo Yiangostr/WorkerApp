@@ -103,7 +103,7 @@ export function AuthForm({ disabled }: AuthFormProps) {
           minLength={8}
           required
         />
-        {state.error && <p className="text-sm text-red-400">{state.error}</p>}
+        {state.error && <p className="text-sm text-destructive">{state.error}</p>}
         <Button type="submit" className="w-full" disabled={state.loading || disabled}>
           {state.loading ? (
             'Loading...'
@@ -121,13 +121,13 @@ export function AuthForm({ disabled }: AuthFormProps) {
         </Button>
       </form>
 
-      <div className="text-center text-sm text-slate-400">
+      <div className="text-center text-sm text-muted-foreground">
         {state.mode === 'signin' ? (
           <>
             Don&apos;t have an account?{' '}
             <button
               type="button"
-              className="text-emerald-400 hover:underline"
+              className="text-primary hover:underline"
               onClick={() => dispatch({ type: 'SET_MODE', mode: 'signup' })}
             >
               Sign up
@@ -138,7 +138,7 @@ export function AuthForm({ disabled }: AuthFormProps) {
             Already have an account?{' '}
             <button
               type="button"
-              className="text-emerald-400 hover:underline"
+              className="text-primary hover:underline"
               onClick={() => dispatch({ type: 'SET_MODE', mode: 'signin' })}
             >
               Sign in
@@ -149,10 +149,10 @@ export function AuthForm({ disabled }: AuthFormProps) {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-700" />
+          <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-slate-900 px-2 text-slate-500">Or</span>
+          <span className="bg-background px-2 text-muted-foreground">Or</span>
         </div>
       </div>
 

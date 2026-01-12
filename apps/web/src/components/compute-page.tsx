@@ -9,6 +9,7 @@ import { AuthForm } from '@/components/auth-form';
 import { HistoryCard } from '@/components/history-card';
 import { trpc } from '@/lib/trpc';
 import { signOut, getSession, handleAuthCallback, getAuthError } from '@/lib/auth-client';
+import { useMessages } from '@/lib/i18n/i18n-provider';
 import { LogOut, Sparkles, AlertCircle, X } from 'lucide-react';
 import type { RunOutput, ProgressEvent } from '@worker-app/api';
 
@@ -72,6 +73,7 @@ function pageReducer(state: PageState, action: PageAction): PageState {
 }
 
 export function ComputePage() {
+  const t = useMessages('compute');
   const [state, dispatch] = useReducer(pageReducer, {
     session: null,
     sessionLoading: true,
@@ -138,23 +140,23 @@ export function ComputePage() {
   const isComputing = createMutation.isPending || state.currentRun?.status === 'IN_PROGRESS';
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 sm:p-8">
+    <main className="min-h-screen bg-background p-4 sm:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
         <header className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 text-sm font-medium">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
             AI-Powered Computations
           </div>
-          <h1 className="text-4xl font-bold text-white tracking-tight">Worker App</h1>
-          <p className="text-slate-400">Queue-based parallel computations with LLM integration</p>
+          <h1 className="text-4xl font-bold text-foreground tracking-tight">Worker App</h1>
+          <p className="text-muted-foreground">Queue-based parallel computations with LLM integration</p>
         </header>
 
         {state.authError && (
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
             <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <div className="flex-1 text-sm">{state.authError}</div>
             <button
               onClick={() => dispatch({ type: 'SET_AUTH_ERROR', error: null })}
-              className="p-1 hover:bg-red-500/20 rounded"
+              className="p-1 hover:bg-destructive/20 rounded"
             >
               <X className="h-4 w-4" />
             </button>
@@ -169,8 +171,8 @@ export function ComputePage() {
             {state.session ? (
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-white">{state.session.user.name ?? 'User'}</p>
-                  <p className="text-sm text-slate-400">{state.session.user.email}</p>
+                  <p className="font-medium text-foreground">{state.session.user.name ?? 'User'}</p>
+                  <p className="text-sm text-muted-foreground">{state.session.user.email}</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={signOut}>
                   <LogOut className="h-4 w-4 mr-2" />
@@ -185,7 +187,7 @@ export function ComputePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Compute</CardTitle>
+            <CardTitle>{t.title}</CardTitle>
           </CardHeader>
           <CardContent>
             <ComputeForm
@@ -195,7 +197,7 @@ export function ComputePage() {
             />
             {!state.session && !state.sessionLoading && (
               <p className="text-sm text-amber-400 mt-4 text-center">
-                Please sign in to perform computations
+                {t.form.signInRequired}
               </p>
             )}
           </CardContent>
@@ -204,7 +206,7 @@ export function ComputePage() {
         {state.currentRun && (
           <Card>
             <CardHeader>
-              <CardTitle>Results</CardTitle>
+              <CardTitle>{t.results.title}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResultsDisplay

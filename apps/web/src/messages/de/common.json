@@ -1,0 +1,13 @@
+{
+  "appName": "Worker App",
+  "loading": "Laden...",
+  "error": "Fehler",
+  "success": "Erfolg",
+  "cancel": "Abbrechen",
+  "save": "Speichern",
+  "close": "Schließen",
+  "back": "Zurück",
+  "next": "Weiter",
+  "submit": "Absenden",
+  "or": "Oder"
+}

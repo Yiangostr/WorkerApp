@@ -1,0 +1,9 @@
+{
+  "appName": "Worker App",
+  "theme": "Thème",
+  "themeLight": "Clair",
+  "themeDark": "Sombre",
+  "themeSystem": "Système",
+  "language": "Langue",
+  "signOut": "Se déconnecter"
+}

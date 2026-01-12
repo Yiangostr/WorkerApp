@@ -1,0 +1,31 @@
+{
+  "title": "Calculer",
+  "subtitle": "Calculs alimentés par l'IA",
+  "pageTitle": "Worker App",
+  "pageSubtitle": "Calculs parallèles avec intégration LLM",
+  "form": {
+    "numberA": "Nombre A",
+    "numberAPlaceholder": "Entrer le nombre A",
+    "numberB": "Nombre B",
+    "numberBPlaceholder": "Entrer le nombre B",
+    "submit": "Calculer",
+    "submitting": "Calcul en cours...",
+    "signInRequired": "Veuillez vous connecter pour effectuer des calculs"
+  },
+  "results": {
+    "title": "Résultats",
+    "computing": "Calcul en cours...",
+    "loading": "Chargement...",
+    "jobsFinished": "{completed} sur {total} tâches terminées",
+    "allCompleted": "Tous les calculs ont été effectués avec succès !",
+    "someFailed": "Certains calculs ont échoué. Vérifiez les résultats ci-dessus.",
+    "pending": "En attente",
+    "error": "Erreur"
+  },
+  "operations": {
+    "ADD": "A + B",
+    "SUBTRACT": "A - B",
+    "MULTIPLY": "A × B",
+    "DIVIDE": "A ÷ B"
+  }
+}

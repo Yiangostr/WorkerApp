@@ -6,8 +6,6 @@ import { useState, type ReactNode, useMemo } from 'react';
 import superjson from 'superjson';
 import { trpc } from './trpc';
 
-const SESSION_KEY = 'worker-app-session';
-
 function getApiUrl(): string {
   if (typeof window === 'undefined') {
     return process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
@@ -28,20 +26,6 @@ function getWsUrl(): string {
   return window.location.origin.replace('appweb', 'appapi-server').replace('https://', 'wss://');
 }
 
-function getSessionToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const stored = localStorage.getItem(SESSION_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return parsed.token ?? null;
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
 export function TRPCProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
@@ -56,10 +40,8 @@ export function TRPCProvider({ children }: { children: ReactNode }) {
           false: httpBatchLink({
             url: `${getApiUrl()}/trpc`,
             transformer: superjson,
-            headers() {
-              const token = getSessionToken();
-              return token ? { Authorization: `Bearer ${token}` } : {};
-            },
+            // Auth is handled via HttpOnly cookies (credentials: 'include')
+            // No Authorization header needed - more secure
             fetch(url, options) {
               return fetch(url, { ...options, credentials: 'include' });
             },

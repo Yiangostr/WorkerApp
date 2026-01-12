@@ -1,0 +1,31 @@
+{
+  "title": "Berechnen",
+  "subtitle": "KI-gestützte Berechnungen",
+  "pageTitle": "Worker App",
+  "pageSubtitle": "Parallele Berechnungen mit LLM-Integration",
+  "form": {
+    "numberA": "Zahl A",
+    "numberAPlaceholder": "Zahl A eingeben",
+    "numberB": "Zahl B",
+    "numberBPlaceholder": "Zahl B eingeben",
+    "submit": "Berechnen",
+    "submitting": "Berechne...",
+    "signInRequired": "Bitte melden Sie sich an, um Berechnungen durchzuführen"
+  },
+  "results": {
+    "title": "Ergebnisse",
+    "computing": "Berechne...",
+    "loading": "Laden...",
+    "jobsFinished": "{completed} von {total} Aufgaben abgeschlossen",
+    "allCompleted": "Alle Berechnungen erfolgreich abgeschlossen!",
+    "someFailed": "Einige Berechnungen sind fehlgeschlagen. Überprüfen Sie die Ergebnisse oben.",
+    "pending": "Ausstehend",
+    "error": "Fehler"
+  },
+  "operations": {
+    "ADD": "A + B",
+    "SUBTRACT": "A - B",
+    "MULTIPLY": "A × B",
+    "DIVIDE": "A ÷ B"
+  }
+}

@@ -9,6 +9,36 @@ import { redis } from '@worker-app/queue';
 
 const PORT = parseInt(process.env.PORT ?? '4000', 10);
 
+// CORS allowlist - only these origins can access the API
+const ALLOWED_ORIGINS = new Set([
+  'http://localhost:3000',
+  'http://localhost:4000',
+  process.env.NEXT_PUBLIC_APP_URL,
+  // Railway production URLs
+  'https://worker-appweb-production.up.railway.app',
+].filter(Boolean) as string[]);
+
+// Add any additional origins from env (comma-separated)
+if (process.env.CORS_ALLOWED_ORIGINS) {
+  process.env.CORS_ALLOWED_ORIGINS.split(',').forEach((o) => ALLOWED_ORIGINS.add(o.trim()));
+}
+
+function isOriginAllowed(origin: string | undefined): boolean {
+  if (!origin) return false;
+  return ALLOWED_ORIGINS.has(origin);
+}
+
+function setCorsHeaders(res: import('http').ServerResponse, origin: string | undefined): boolean {
+  if (!origin || !isOriginAllowed(origin)) {
+    return false;
+  }
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  return true;
+}
+
 function nodeToFetchRequest(req: import('http').IncomingMessage, port: number): Request {
   const init: RequestInit & { duplex?: string } = {
     method: req.method,
@@ -24,14 +54,16 @@ function nodeToFetchRequest(req: import('http').IncomingMessage, port: number): 
 }
 
 const server = createServer(async (req, res) => {
-  const origin = req.headers.origin ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  const origin = req.headers.origin;
+  const corsAllowed = setCorsHeaders(res, origin);
 
+  // Preflight requests
   if (req.method === 'OPTIONS') {
-    res.writeHead(204);
+    if (corsAllowed) {
+      res.writeHead(204);
+    } else {
+      res.writeHead(403);
+    }
     res.end();
     return;
   }
@@ -122,8 +154,7 @@ const server = createServer(async (req, res) => {
 
     // Forward all headers properly, especially Set-Cookie (must be multi-valued)
     const forwardHeaders = (targetRes: typeof res) => {
-      targetRes.setHeader('Access-Control-Allow-Origin', origin);
-      targetRes.setHeader('Access-Control-Allow-Credentials', 'true');
+      // CORS headers already set by setCorsHeaders at request start
 
       // Forward non-Set-Cookie headers
       response.headers.forEach((value, key) => {

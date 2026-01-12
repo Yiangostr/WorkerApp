@@ -1,0 +1,31 @@
+{
+  "title": "Compute",
+  "subtitle": "AI-Powered Computations",
+  "pageTitle": "Worker App",
+  "pageSubtitle": "Queue-based parallel computations with LLM integration",
+  "form": {
+    "numberA": "Number A",
+    "numberAPlaceholder": "Enter number A",
+    "numberB": "Number B",
+    "numberBPlaceholder": "Enter number B",
+    "submit": "Compute",
+    "submitting": "Computing...",
+    "signInRequired": "Please sign in to perform computations"
+  },
+  "results": {
+    "title": "Results",
+    "computing": "Computing...",
+    "loading": "Loading...",
+    "jobsFinished": "{completed} of {total} jobs finished",
+    "allCompleted": "All computations completed successfully!",
+    "someFailed": "Some computations failed. Check individual results above.",
+    "pending": "Pending",
+    "error": "Error"
+  },
+  "operations": {
+    "ADD": "A + B",
+    "SUBTRACT": "A - B",
+    "MULTIPLY": "A × B",
+    "DIVIDE": "A ÷ B"
+  }
+}
