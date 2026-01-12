@@ -2,7 +2,7 @@ import { observable } from '@trpc/server/observable';
 import { prisma, Operation } from '@worker-app/db';
 import { enqueueComputeJobs, subscribeToProgress, ALL_OPERATIONS } from '@worker-app/queue';
 import type { ProgressEvent } from '@worker-app/queue';
-import { router, protectedProcedure, publicProcedure } from '../trpc.js';
+import { router, protectedProcedure } from '../trpc.js';
 import {
   CreateRunInputSchema,
   GetRunInputSchema,
@@ -71,9 +71,10 @@ export const computeRouter = router({
     );
   }),
 
-  getRun: publicProcedure.input(GetRunInputSchema).query(async ({ input }) => {
-    const run = await prisma.computationRun.findUnique({
-      where: { id: input.runId },
+  getRun: protectedProcedure.input(GetRunInputSchema).query(async ({ ctx, input }) => {
+    // Scope query to authenticated user to prevent IDOR
+    const run = await prisma.computationRun.findFirst({
+      where: { id: input.runId, userId: ctx.user.id },
       include: { jobs: true },
     });
 
@@ -97,18 +98,31 @@ export const computeRouter = router({
     });
   }),
 
-  subscribe: publicProcedure.input(SubscribeRunInputSchema).subscription(({ input }) => {
+  subscribe: protectedProcedure.input(SubscribeRunInputSchema).subscription(({ ctx, input }) => {
     return observable<ProgressEvent>((emit) => {
       let unsubscribe: (() => Promise<void>) | null = null;
 
-      subscribeToProgress(input.runId, (event) => {
-        const validated = ProgressEventSchema.safeParse(event);
-        if (validated.success) {
-          emit.next(validated.data as ProgressEvent);
-        }
-      })
+      // Verify ownership before subscribing to prevent IDOR
+      prisma.computationRun
+        .findFirst({
+          where: { id: input.runId, userId: ctx.user.id },
+          select: { id: true },
+        })
+        .then((run) => {
+          if (!run) {
+            emit.error(new Error('Run not found or access denied'));
+            return;
+          }
+
+          return subscribeToProgress(input.runId, (event) => {
+            const validated = ProgressEventSchema.safeParse(event);
+            if (validated.success) {
+              emit.next(validated.data as ProgressEvent);
+            }
+          });
+        })
         .then((unsub) => {
-          unsubscribe = unsub;
+          if (unsub) unsubscribe = unsub;
         })
         .catch((err) => {
           console.error('[Subscription] Failed to subscribe:', err);
