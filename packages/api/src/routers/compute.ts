@@ -72,7 +72,6 @@ export const computeRouter = router({
   }),
 
   getRun: protectedProcedure.input(GetRunInputSchema).query(async ({ ctx, input }) => {
-    // Scope query to authenticated user to prevent IDOR
     const run = await prisma.computationRun.findFirst({
       where: { id: input.runId, userId: ctx.user.id },
       include: { jobs: true },
@@ -102,7 +101,6 @@ export const computeRouter = router({
     return observable<ProgressEvent>((emit) => {
       let unsubscribe: (() => Promise<void>) | null = null;
 
-      // Verify ownership before subscribing to prevent IDOR
       prisma.computationRun
         .findFirst({
           where: { id: input.runId, userId: ctx.user.id },
