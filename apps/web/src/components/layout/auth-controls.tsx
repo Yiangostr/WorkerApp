@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { useI18n } from '@/lib/i18n/i18n-provider';
 import { useMessages } from '@/lib/i18n/i18n-provider';
@@ -7,19 +8,22 @@ import { LOCALES, LOCALE_NAMES, type Locale } from '@/lib/i18n/locales';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Globe, Moon, Sun, Monitor } from 'lucide-react';
 
 export function AuthControls() {
+  const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
   const { locale, setLocale } = useI18n();
   const t = useMessages('nav');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const themeOptions = [
     { value: 'light', label: t.themeLight, icon: Sun },
@@ -29,7 +33,6 @@ export function AuthControls() {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Language Selector */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
@@ -38,7 +41,9 @@ export function AuthControls() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuLabel className="text-xs text-muted-foreground">{t.language}</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-xs text-muted-foreground">
+            {t.language}
+          </DropdownMenuLabel>
           {LOCALES.map((loc) => (
             <DropdownMenuItem
               key={loc}
@@ -52,11 +57,12 @@ export function AuthControls() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Theme Selector */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
-            {theme === 'light' ? (
+            {!mounted ? (
+              <Monitor className="h-4 w-4" />
+            ) : theme === 'light' ? (
               <Sun className="h-4 w-4" />
             ) : theme === 'dark' ? (
               <Moon className="h-4 w-4" />
@@ -73,7 +79,7 @@ export function AuthControls() {
               <DropdownMenuItem
                 key={option.value}
                 onClick={() => setTheme(option.value)}
-                className={theme === option.value ? 'bg-accent' : ''}
+                className={mounted && theme === option.value ? 'bg-accent' : ''}
               >
                 <Icon className="mr-2 h-4 w-4" />
                 <span>{option.label}</span>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { signOut } from '@/lib/auth-client';
 import { useMessages, useI18n } from '@/lib/i18n/i18n-provider';
@@ -30,9 +31,14 @@ function getInitials(name: string): string {
 }
 
 export function UserMenu({ user }: UserMenuProps) {
+  const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
   const { locale, setLocale } = useI18n();
   const t = useMessages('nav');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const themeOptions = [
     { value: 'light', label: t.themeLight, icon: Sun },
@@ -67,7 +73,7 @@ export function UserMenu({ user }: UserMenuProps) {
               <DropdownMenuItem
                 key={option.value}
                 onClick={() => setTheme(option.value)}
-                className={theme === option.value ? 'bg-accent' : ''}
+                className={mounted && theme === option.value ? 'bg-accent' : ''}
               >
                 <Icon className="mr-2 h-4 w-4" />
                 <span>{option.label}</span>
@@ -77,7 +83,9 @@ export function UserMenu({ user }: UserMenuProps) {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-xs text-muted-foreground">{t.language}</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-xs text-muted-foreground">
+            {t.language}
+          </DropdownMenuLabel>
           {LOCALES.map((loc) => (
             <DropdownMenuItem
               key={loc}
@@ -90,7 +98,10 @@ export function UserMenu({ user }: UserMenuProps) {
           ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={signOut} className="text-red-400 focus:text-red-400 focus:bg-red-500/10">
+        <DropdownMenuItem
+          onClick={signOut}
+          className="text-red-400 focus:text-red-400 focus:bg-red-500/10"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>{t.signOut}</span>
         </DropdownMenuItem>
