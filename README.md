@@ -293,6 +293,99 @@ WS   /trpc/compute.subscribe # Real-time updates
                    └─────────────┘     └─────────────┘
 ```
 
+---
+
+## Design & Architecture Decisions
+
+### Thinking Process
+
+The goal was to build a modular, scalable queue/worker system that demonstrates modern full-stack development practices. The key challenges were:
+
+1. **Real-time updates**: Users need to see job progress as it happens
+2. **Parallel processing**: Multiple jobs should execute concurrently
+3. **Type safety**: Ensure data integrity across frontend, API, and worker
+4. **Separation of concerns**: Each component should be independently deployable
+
+### Why These Technologies?
+
+| Technology         | Reason                                                                                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Turborepo**      | Enables shared packages (`db`, `queue`, `api`) across apps with efficient build caching. Reduces code duplication and ensures consistency.                           |
+| **tRPC**           | End-to-end type safety between frontend and backend without code generation. Changes to API schemas immediately surface as TypeScript errors in the frontend.        |
+| **BullMQ + Redis** | Production-ready job queue with built-in retry logic, concurrency control, and job prioritization. Redis pub/sub enables real-time progress updates without polling. |
+| **Better Auth**    | Modern authentication library with built-in OAuth providers (Microsoft Entra ID), session management, and secure cookie handling. Less boilerplate than NextAuth.    |
+| **MongoDB Atlas**  | Flexible document schema fits well with computation runs that embed multiple jobs. Managed service reduces operational overhead.                                     |
+| **Prisma**         | Type-safe database access with auto-generated client. Schema-as-code makes database changes trackable in version control.                                            |
+
+### Key Design Choices
+
+1. **Separate API + Worker services**: The API server handles HTTP/WebSocket requests while workers process jobs. This allows independent scaling - add more workers during high load without affecting API response times.
+
+2. **Redis Pub/Sub for real-time**: Workers publish progress events to Redis channels. The API server subscribes and forwards to connected WebSocket clients. This decouples workers from direct client communication.
+
+3. **LLM with deterministic fallback**: The system uses an LLM (Z.AI GLM-4.7) for computations but falls back to standard arithmetic if the LLM fails. This demonstrates AI integration while ensuring reliability.
+
+4. **Protected endpoints with user scoping**: All data access is scoped to the authenticated user via `protectedProcedure` and `userId` filters. This prevents IDOR (Insecure Direct Object Reference) vulnerabilities.
+
+5. **Monorepo shared packages**: Common code (`@worker-app/db`, `@worker-app/queue`, `@worker-app/api`) is shared across apps. A schema change in one place updates everywhere.
+
+6. **3-second job delay**: Simulates real processing time and demonstrates the progress bar and real-time subscription functionality.
+
+### Data Flow
+
+```
+User clicks "Compute"
+       │
+       ▼
+┌──────────────────┐
+│  Frontend sends  │
+│  tRPC mutation   │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│   API creates    │
+│ ComputationRun + │
+│   4 Job records  │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│  Jobs queued in  │
+│     BullMQ       │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│  Worker picks up │
+│  jobs (parallel) │
+│  + 3s delay each │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│  LLM computes    │
+│  result, saves   │
+│  to database     │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Progress event   │
+│ published to     │
+│ Redis pub/sub    │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ API forwards to  │
+│ WebSocket client │
+│ UI updates live  │
+└──────────────────┘
+```
+
+---
+
 ## Contact me for .env
 
 ## License
