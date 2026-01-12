@@ -1,5 +1,7 @@
 {
   "appName": "Worker App",
+  "heroTitle": "AI-Powered\nParallel Computing",
+  "heroDescription": "Queue-based computations with LLM integration. Process mathematical operations in parallel with real-time updates.",
   "loading": "Loading...",
   "error": "Error",
   "success": "Success",

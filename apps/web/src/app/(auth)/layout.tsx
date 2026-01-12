@@ -2,8 +2,12 @@
 
 import type { ReactNode } from 'react';
 import { AuthControls } from '@/components/layout/auth-controls';
+import { useMessages } from '@/lib/i18n/i18n-provider';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
+  const t = useMessages('common');
+  const heroTitleLines = t.heroTitle.split('\n');
+
   return (
     <div className="min-h-screen flex">
       {/* Left side - Decorative */}
@@ -17,13 +21,18 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <span className="text-2xl font-bold text-white">Worker App</span>
+              <span className="text-2xl font-bold text-white">{t.appName}</span>
             </div>
             <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight">
-              AI-Powered<br />Parallel Computing
+              {heroTitleLines.map((line, i) => (
+                <span key={i}>
+                  {line}
+                  {i < heroTitleLines.length - 1 && <br />}
+                </span>
+              ))}
             </h1>
             <p className="text-lg text-white/80 max-w-md">
-              Queue-based computations with LLM integration. Process mathematical operations in parallel with real-time updates.
+              {t.heroDescription}
             </p>
           </div>
         </div>

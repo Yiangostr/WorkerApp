@@ -1,5 +1,7 @@
 {
   "appName": "Worker App",
+  "heroTitle": "KI-gestütztes\nParalleles Rechnen",
+  "heroDescription": "Warteschlangenbasierte Berechnungen mit LLM-Integration. Verarbeiten Sie mathematische Operationen parallel mit Echtzeit-Updates.",
   "loading": "Laden...",
   "error": "Fehler",
   "success": "Erfolg",

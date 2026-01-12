@@ -58,18 +58,18 @@ export default function ForgotPasswordPage() {
     return (
       <div className="space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6">
-            <CheckCircle className="h-8 w-8 text-emerald-400" />
+          <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+            <CheckCircle className="h-8 w-8 text-primary" />
           </div>
-          <h2 className="text-3xl font-bold text-white">{t.forgotPassword.successTitle}</h2>
-          <p className="mt-2 text-slate-400">
+          <h2 className="text-3xl font-bold text-foreground">{t.forgotPassword.successTitle}</h2>
+          <p className="mt-2 text-muted-foreground">
             {interpolate(t.forgotPassword.successMessage, { email: state.email })}
           </p>
         </div>
 
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-card border-border shadow-lg">
           <CardContent className="pt-6 text-center">
-            <p className="text-sm text-slate-400 mb-4">{t.forgotPassword.successHint}</p>
+            <p className="text-sm text-muted-foreground mb-4">{t.forgotPassword.successHint}</p>
             <Button variant="outline" className="w-full" onClick={() => window.location.reload()}>
               {t.forgotPassword.tryAgain}
             </Button>
@@ -79,7 +79,7 @@ export default function ForgotPasswordPage() {
         <p className="text-center">
           <Link
             href="/login"
-            className="inline-flex items-center text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
+            className="inline-flex items-center text-sm text-primary hover:text-primary/80 transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t.forgotPassword.backToLogin}
@@ -92,15 +92,15 @@ export default function ForgotPasswordPage() {
   return (
     <div className="space-y-8">
       <div className="text-center lg:text-left">
-        <h2 className="text-3xl font-bold text-white">{t.forgotPassword.title}</h2>
-        <p className="mt-2 text-slate-400">{t.forgotPassword.subtitle}</p>
+        <h2 className="text-3xl font-bold text-foreground">{t.forgotPassword.title}</h2>
+        <p className="mt-2 text-muted-foreground">{t.forgotPassword.subtitle}</p>
       </div>
 
-      <Card className="bg-slate-900/50 border-slate-800">
+      <Card className="bg-card border-border shadow-lg">
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-slate-300">
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
                 {t.forgotPassword.email}
               </label>
               <Input
@@ -115,7 +115,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             {state.error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
                 {state.error}
               </div>
             )}
@@ -137,7 +137,7 @@ export default function ForgotPasswordPage() {
       <p className="text-center">
         <Link
           href="/login"
-          className="inline-flex items-center text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
+          className="inline-flex items-center text-sm text-primary hover:text-primary/80 transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t.forgotPassword.backToLogin}

@@ -144,10 +144,10 @@ export function ComputePage() {
       <div className="max-w-2xl mx-auto space-y-8">
         <header className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-            AI-Powered Computations
+            {t.subtitle}
           </div>
-          <h1 className="text-4xl font-bold text-foreground tracking-tight">Worker App</h1>
-          <p className="text-muted-foreground">Queue-based parallel computations with LLM integration</p>
+          <h1 className="text-4xl font-bold text-foreground tracking-tight">{t.pageTitle}</h1>
+          <p className="text-muted-foreground">{t.pageSubtitle}</p>
         </header>
 
         {state.authError && (
@@ -196,9 +196,7 @@ export function ComputePage() {
               disabled={!state.session}
             />
             {!state.session && !state.sessionLoading && (
-              <p className="text-sm text-amber-400 mt-4 text-center">
-                {t.form.signInRequired}
-              </p>
+              <p className="text-sm text-amber-400 mt-4 text-center">{t.form.signInRequired}</p>
             )}
           </CardContent>
         </Card>

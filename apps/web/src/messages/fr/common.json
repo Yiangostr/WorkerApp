@@ -1,5 +1,7 @@
 {
   "appName": "Worker App",
+  "heroTitle": "Calculs parallèles\nalimentés par l'IA",
+  "heroDescription": "Calculs basés sur des files d'attente avec intégration LLM. Traitez les opérations mathématiques en parallèle avec des mises à jour en temps réel.",
   "loading": "Chargement...",
   "error": "Erreur",
   "success": "Succès",
